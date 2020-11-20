@@ -3,6 +3,8 @@ import Tilemap from '../level/Tilemap';
 import Level from "../level/Level";
 import Tile from "../level/Tile";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import Game from "./Game";
+import Animation from "../animation/Animation";
 
 export default class Renderer {
 
@@ -26,12 +28,18 @@ export default class Renderer {
         this.ctx.fillStyle = "#000000";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
-    
-    drawIntro(){
+
+    drawIntro() {
         this.clear();
         this.ctx.fillStyle = "#FFFFFF";
         this.ctx.font = "72px Georgia";
-        this.ctx.fillText("Big smile!", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+        this.ctx.fillText("Big smile!", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+    }
+
+    drawAnimation(game:Game) {
+        const animation : Animation= game.currentAnimation!;
+        animation.update();
+        animation.draw(this.ctx);
     }
 
     draw(level: Level): void {

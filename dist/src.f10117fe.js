@@ -495,12 +495,111 @@ function () {
 }();
 
 exports.default = AssetsManager;
-},{}],"src/core/EventsManager.ts":[function(require,module,exports) {
+},{}],"src/utils/colors.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.Colors = void 0;
+var Colors;
+
+(function (Colors) {
+  Colors["BLACK"] = "#000000";
+  Colors["RED"] = "#FF0000";
+})(Colors = exports.Colors || (exports.Colors = {}));
+},{}],"src/animation/AnimationState.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var AnimationState =
+/** @class */
+function () {
+  function AnimationState() {
+    this.startTime = 0;
+    this.elapsedTime = 0;
+    this.startTime = window.performance.now();
+  }
+
+  return AnimationState;
+}();
+
+exports.default = AnimationState;
+},{}],"src/animation/Animation.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Game_1 = require("../core/Game");
+
+var colors_1 = require("../utils/colors");
+
+var constants_1 = require("../utils/constants");
+
+var AnimationState_1 = __importDefault(require("./AnimationState"));
+
+var Animation =
+/** @class */
+function () {
+  function Animation(game, duration) {
+    if (duration === void 0) {
+      duration = 1000;
+    }
+
+    this.game = game;
+    this.duration = duration;
+    this.state = new AnimationState_1.default();
+  }
+
+  Animation.prototype.update = function () {
+    this.state.elapsedTime = window.performance.now();
+    var deltaTime = this.state.elapsedTime - this.state.startTime;
+    if (deltaTime > this.duration) this.finish();
+  };
+
+  Animation.prototype.draw = function (ctx) {
+    ctx.fillStyle = colors_1.Colors.BLACK;
+    ctx.fillRect(0, 0, constants_1.WINDOW_WIDTH, constants_1.WINDOW_HEIGHT);
+    ctx.fillStyle = colors_1.Colors.RED;
+    var deltaTime = (this.state.elapsedTime - this.state.startTime) / this.duration;
+    var x = Math.sin(Math.PI * deltaTime) * constants_1.WINDOW_WIDTH;
+    ctx.fillRect(0, 0, x, constants_1.WINDOW_HEIGHT);
+  };
+
+  Animation.prototype.finish = function () {
+    /* Linkar Animacoes */
+    this.game.currentGameState = Game_1.GameStates.RUNNING;
+  };
+
+  return Animation;
+}();
+
+exports.default = Animation;
+},{"../core/Game":"src/core/Game.ts","../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./AnimationState":"src/animation/AnimationState.ts"}],"src/core/EventsManager.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Animation_1 = __importDefault(require("../animation/Animation"));
 
 var directions_1 = require("../utils/directions");
 
@@ -540,7 +639,8 @@ function () {
         case 'Enter':
           {
             if (_this.game.currentGameState === Game_1.GameStates.INTRO) {
-              _this.game.currentGameState = Game_1.GameStates.RUNNING;
+              _this.game.currentAnimation = new Animation_1.default(_this.game, 1500);
+              _this.game.currentGameState = Game_1.GameStates.ANIMATING;
             }
 
             break;
@@ -575,7 +675,7 @@ function () {
 }();
 
 exports.default = EventsManager;
-},{"../utils/directions":"src/utils/directions.ts","./Game":"src/core/Game.ts"}],"src/core/Renderer.ts":[function(require,module,exports) {
+},{"../animation/Animation":"src/animation/Animation.ts","../utils/directions":"src/utils/directions.ts","./Game":"src/core/Game.ts"}],"src/core/Renderer.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -619,6 +719,12 @@ function () {
     this.ctx.fillStyle = "#FFFFFF";
     this.ctx.font = "72px Georgia";
     this.ctx.fillText("Big smile!", constants_1.WINDOW_WIDTH / 2, constants_1.WINDOW_HEIGHT / 2);
+  };
+
+  Renderer.prototype.drawAnimation = function (game) {
+    var animation = game.currentAnimation;
+    animation.update();
+    animation.draw(this.ctx);
   };
 
   Renderer.prototype.draw = function (level) {
@@ -714,6 +820,7 @@ function () {
   function Game() {
     this.isRunning = false;
     this.currentLevel = null;
+    this.currentAnimation = null;
     this._assetsLoader = new AssetsLoader_1.default();
     this._renderer = new Renderer_1.default();
     this._eventsManager = new EventsManager_1.default(this);
@@ -758,6 +865,11 @@ function () {
 
       case GameStates.RUNNING:
         this._renderer.draw(this.currentLevel);
+
+        break;
+
+      case GameStates.ANIMATING:
+        this._renderer.drawAnimation(this);
 
         break;
     }
@@ -819,7 +931,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60519" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60511" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

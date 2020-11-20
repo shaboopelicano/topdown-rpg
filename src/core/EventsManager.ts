@@ -1,3 +1,4 @@
+import Animation from "../animation/Animation";
 import { Directions } from "../utils/directions";
 import Game, { GameStates } from "./Game";
 
@@ -17,7 +18,8 @@ export default class EventsManager {
                 case 'd': this.game.currentLevel?.player.setVelocity(Directions.RIGHT); break;
                 case 'Enter': {
                     if (this.game.currentGameState === GameStates.INTRO){
-                        this.game.currentGameState = GameStates.RUNNING;
+                        this.game.currentAnimation= new Animation(this.game,1500);
+                        this.game.currentGameState = GameStates.ANIMATING;
                     }
                     break;
                 }
