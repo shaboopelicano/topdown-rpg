@@ -29,14 +29,28 @@ export default class Player extends Character {
         const objMatrix = level.map.objects;
         const levelTileWidth = level.map.levelTileWidth;
         const levelTileHeight = level.map.levelTileHeight;
-        const cX = Math.floor((this.x + this.vX + levelTileWidth / 2) / levelTileWidth);
-        const cY = Math.floor((this.y + this.vY + levelTileHeight / 2) / levelTileHeight);
 
-        if (cY < 0 || cY > level.map.height - 1) return true;
+        const cXE = Math.floor((this.x + this.vX) / levelTileWidth);
+        const cXD = Math.floor((this.x + this.vX + levelTileWidth) / levelTileWidth);
 
-        if (objMatrix[cY][cX] === 1) {
+        const cYC = Math.floor((this.y + this.vY) / levelTileHeight);
+        const cYB = Math.floor((this.y + this.vY + levelTileHeight) / levelTileHeight);
+
+        if (cYC < 0 || cYC > level.map.height - 1) return true;
+
+        if (objMatrix[cYC][cXE] === 1) {
             return false;
         }
+        else if (objMatrix[cYC][cXD] === 1) {
+            return false;
+        }
+        else if (objMatrix[cYB][cXE] === 1) {
+            return false;
+        }
+        else if (objMatrix[cYB][cXD] === 1) {
+            return false;
+        }
+
         return true;
     }
 

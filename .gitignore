@@ -4,3 +4,4 @@ dist/
 .cache/
 debug.log
 package-lock.json
+typescript_notes/
