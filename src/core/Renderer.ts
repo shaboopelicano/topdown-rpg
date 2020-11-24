@@ -3,6 +3,9 @@ import Tilemap from '../level/Tilemap';
 import Level from "../level/Level";
 import Tile from "../level/Tile";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import Game, { GameStates } from "./Game";
+import Animation from "../animation/Animation";
+import { Colors } from "../utils/colors";
 
 export default class Renderer {
 
@@ -26,15 +29,21 @@ export default class Renderer {
         this.ctx.fillStyle = "#000000";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
-    
-    drawIntro(){
+
+    drawIntro() {
         this.clear();
         this.ctx.fillStyle = "#FFFFFF";
         this.ctx.font = "72px Georgia";
-        this.ctx.fillText("Big smile!", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+        this.ctx.fillText("Big smile!", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     }
 
-    draw(level: Level): void {
+    drawAnimation(game: Game) {
+        const animation: Animation = game.currentAnimation!;
+        animation.update();
+        animation.draw(this.ctx);
+    }
+
+    draw(game: Game, level: Level): void {
         this.clear();
         this.drawBackground(level);
         this.drawObjects(level);
@@ -60,10 +69,10 @@ export default class Renderer {
         level.map.objects.forEach((r, i) => {
             r.forEach((c, j) => {
                 if (c === 1) {
-                    this.ctx.fillStyle = "#FFFFFF";
+                    this.ctx.fillStyle = Colors.WHITE;
                     this.ctx.fillRect(level.map.levelTileWidth * j, level.map.levelTileHeight * i,
                         level.map.levelTileWidth, level.map.levelTileHeight);
-                    this.ctx.fillStyle = "#000000";
+                    this.ctx.fillStyle = Colors.BLACK;
                 }
             });
         });

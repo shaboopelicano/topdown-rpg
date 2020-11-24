@@ -1,5 +1,5 @@
 import Tilemap from '../level/Tilemap';
-import { WINDOW_WIDTH } from '../utils/constants';
+import { WINDOW_HEIGHT, WINDOW_WIDTH } from '../utils/constants';
 
 export default class Map {
 
@@ -12,9 +12,9 @@ export default class Map {
 
     constructor() {
         this.width = 20;
-        this.height = 20;
+        this.height = 10;
         this.levelTileWidth = Math.floor(WINDOW_WIDTH / this.width);
-        this.levelTileHeight = Math.floor(WINDOW_WIDTH / this.height);
+        this.levelTileHeight = Math.floor(WINDOW_HEIGHT / this.height);
         this.matrix = [];
         this.objects = [];
         this.initializeMap();
@@ -41,7 +41,7 @@ export default class Map {
         for (let i = 0; i < this.height; i++) {
             this.objects.push([]);
             for (let j = 0; j < this.width; j++) {
-                if (Math.random() < .2)
+                if (Math.random() < .1)
                     this.objects[i].push(1);
                 else
                     this.objects[i].push(0);
