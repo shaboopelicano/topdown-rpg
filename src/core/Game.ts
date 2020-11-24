@@ -25,7 +25,7 @@ export default class Game {
         this._renderer = new Renderer();
         this._eventsManager = new EventsManager(this);
         this.levelLoader = new LevelLoader(this);
-        this.currentGameStates = [GameStates.INTRO];
+        this.currentGameStates = [GameStates.RUNNING];
         this.initializeGame();
     }
 

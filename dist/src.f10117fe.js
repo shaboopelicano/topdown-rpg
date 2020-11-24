@@ -271,11 +271,19 @@ function (_super) {
     var objMatrix = level.map.objects;
     var levelTileWidth = level.map.levelTileWidth;
     var levelTileHeight = level.map.levelTileHeight;
-    var cX = Math.floor((this.x + this.vX + levelTileWidth / 2) / levelTileWidth);
-    var cY = Math.floor((this.y + this.vY + levelTileHeight / 2) / levelTileHeight);
-    if (cY < 0 || cY > level.map.height - 1) return true;
+    var cXE = Math.floor((this.x + this.vX) / levelTileWidth);
+    var cXD = Math.floor((this.x + this.vX + levelTileWidth) / levelTileWidth);
+    var cYC = Math.floor((this.y + this.vY) / levelTileHeight);
+    var cYB = Math.floor((this.y + this.vY + levelTileHeight) / levelTileHeight);
+    if (cYC < 0 || cYC > level.map.height - 1) return true;
 
-    if (objMatrix[cY][cX] === 1) {
+    if (objMatrix[cYC][cXE] === 1) {
+      return false;
+    } else if (objMatrix[cYC][cXD] === 1) {
+      return false;
+    } else if (objMatrix[cYB][cXE] === 1) {
+      return false;
+    } else if (objMatrix[cYB][cXD] === 1) {
       return false;
     }
 
@@ -883,7 +891,7 @@ function () {
     this._renderer = new Renderer_1.default();
     this._eventsManager = new EventsManager_1.default(this);
     this.levelLoader = new LevelLoader_1.default(this);
-    this.currentGameStates = [GameStates.INTRO];
+    this.currentGameStates = [GameStates.RUNNING];
     this.initializeGame();
   }
 
@@ -951,7 +959,7 @@ function () {
 
 exports.default = Game;
 },{"../level/Level":"src/level/Level.ts","../level/LevelLoader":"src/level/LevelLoader.ts","../utils/directions":"src/utils/directions.ts","./AssetsLoader":"src/core/AssetsLoader.ts","./AssetsManager":"src/core/AssetsManager.ts","./EventsManager":"src/core/EventsManager.ts","./Renderer":"src/core/Renderer.ts"}],"src/index.ts":[function(require,module,exports) {
-"use strict";
+"use strict"; // import '../typescript_notes/typescriptNotes';
 
 var __importDefault = this && this.__importDefault || function (mod) {
   return mod && mod.__esModule ? mod : {
@@ -994,7 +1002,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51050" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51016" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
