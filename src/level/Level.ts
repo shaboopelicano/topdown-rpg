@@ -6,9 +6,9 @@ export default class Level {
     map: Map;
     player:Player;
 
-    constructor() {
+    constructor(player?:Player) {
         this.map = new Map();
-        this.player = new Player();
+        this.player = player ? player : new Player();
     }
 
 }

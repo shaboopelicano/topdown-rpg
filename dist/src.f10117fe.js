@@ -270,8 +270,10 @@ function (_super) {
   Player.prototype.checkCollision = function (level) {
     var objMatrix = level.map.objects;
     var levelTileWidth = level.map.levelTileWidth;
-    var cX = Math.floor((this.x + this.vX + level.map.levelTileWidth / 2) / levelTileWidth);
-    var cY = Math.floor((this.y + this.vY + level.map.levelTileHeight / 2) / levelTileWidth);
+    var levelTileHeight = level.map.levelTileHeight;
+    var cX = Math.floor((this.x + this.vX + levelTileWidth / 2) / levelTileWidth);
+    var cY = Math.floor((this.y + this.vY + levelTileHeight / 2) / levelTileHeight);
+    if (cY < 0 || cY > level.map.height - 1) return true;
 
     if (objMatrix[cY][cX] === 1) {
       return false;
@@ -282,20 +284,23 @@ function (_super) {
 
   Player.prototype.checkBoundaries = function (level) {
     var levelTileWidth = level.map.levelTileWidth;
-    var cX = Math.floor((this.x + this.vX + level.map.levelTileWidth / 2) / levelTileWidth);
-    var cY = Math.floor((this.y + this.vY + level.map.levelTileHeight / 2) / levelTileWidth);
+    var levelTileHeight = level.map.levelTileHeight;
+    var cX = Math.floor((this.x + this.vX + levelTileWidth / 2) / levelTileWidth);
+    var cY = Math.floor((this.y + this.vY + levelTileHeight / 2) / levelTileHeight);
 
     if (cX < 0) {
       this.x = constants_1.WINDOW_WIDTH - levelTileWidth;
+      this.y = level.player.y;
       return directions_1.Directions.LEFT;
     } else if (cY < 0) {
-      console.log('Up');
+      this.y = constants_1.WINDOW_HEIGHT - levelTileWidth;
       return directions_1.Directions.UP;
     } else if (cX > level.map.width) {
-      console.log('RI');
+      this.x = 0;
+      this.y = level.player.y;
       return directions_1.Directions.RIGHT;
     } else if (cY > level.map.height) {
-      console.log('RI');
+      this.y = 0;
       return directions_1.Directions.DOWN;
     }
 
@@ -382,9 +387,9 @@ var Map =
 function () {
   function Map() {
     this.width = 20;
-    this.height = 20;
+    this.height = 10;
     this.levelTileWidth = Math.floor(constants_1.WINDOW_WIDTH / this.width);
-    this.levelTileHeight = Math.floor(constants_1.WINDOW_WIDTH / this.height);
+    this.levelTileHeight = Math.floor(constants_1.WINDOW_HEIGHT / this.height);
     this.matrix = [];
     this.objects = [];
     this.initializeMap();
@@ -416,7 +421,7 @@ function () {
       this.objects.push([]);
 
       for (var j = 0; j < this.width; j++) {
-        if (Math.random() < .2) this.objects[i].push(1);else this.objects[i].push(0);
+        if (Math.random() < .1) this.objects[i].push(1);else this.objects[i].push(0);
       }
     }
   };
@@ -445,57 +450,16 @@ var Map_1 = __importDefault(require("./Map"));
 var Level =
 /** @class */
 function () {
-  function Level() {
+  function Level(player) {
     this.map = new Map_1.default();
-    this.player = new Player_1.default();
+    this.player = player ? player : new Player_1.default();
   }
 
   return Level;
 }();
 
 exports.default = Level;
-},{"../character/Player":"src/character/Player.ts","./Map":"src/level/Map.ts"}],"src/core/AssetsLoader.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var constants_1 = require("../utils/constants");
-
-var AssetsLoader =
-/** @class */
-function () {
-  function AssetsLoader() {}
-
-  AssetsLoader.prototype.loadAssets = function () {
-    var img = new Image();
-    img.src = constants_1.ASSETS_PATH + "/monochrome1.png";
-    return img;
-  };
-
-  return AssetsLoader;
-}();
-
-exports.default = AssetsLoader;
-},{"../utils/constants":"src/utils/constants.ts"}],"src/core/AssetsManager.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var AssetsManager =
-/** @class */
-function () {
-  function AssetsManager() {}
-
-  AssetsManager.tileset = null;
-  return AssetsManager;
-}();
-
-exports.default = AssetsManager;
-},{}],"src/utils/colors.ts":[function(require,module,exports) {
+},{"../character/Player":"src/character/Player.ts","./Map":"src/level/Map.ts"}],"src/utils/colors.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -507,6 +471,7 @@ var Colors;
 (function (Colors) {
   Colors["BLACK"] = "#000000";
   Colors["RED"] = "#FF0000";
+  Colors["WHITE"] = "#FFFFFF";
 })(Colors = exports.Colors || (exports.Colors = {}));
 },{}],"src/animation/AnimationState.ts":[function(require,module,exports) {
 "use strict";
@@ -554,7 +519,7 @@ var Animation =
 function () {
   function Animation(game, duration) {
     if (duration === void 0) {
-      duration = 1000;
+      duration = 3000;
     }
 
     this.game = game;
@@ -569,8 +534,8 @@ function () {
   };
 
   Animation.prototype.draw = function (ctx) {
-    ctx.fillStyle = colors_1.Colors.BLACK;
-    ctx.fillRect(0, 0, constants_1.WINDOW_WIDTH, constants_1.WINDOW_HEIGHT);
+    // ctx.fillStyle = Colors.BLACK;
+    // ctx.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT)
     ctx.fillStyle = colors_1.Colors.RED;
     var deltaTime = (this.state.elapsedTime - this.state.startTime) / this.duration;
     var x = Math.sin(Math.PI * deltaTime) * constants_1.WINDOW_WIDTH;
@@ -579,14 +544,16 @@ function () {
 
   Animation.prototype.finish = function () {
     /* Linkar Animacoes */
-    this.game.currentGameState = Game_1.GameStates.RUNNING;
+    this.game.currentGameStates = this.game.currentGameStates.filter(function (state) {
+      return state === Game_1.GameStates.RUNNING;
+    });
   };
 
   return Animation;
 }();
 
 exports.default = Animation;
-},{"../core/Game":"src/core/Game.ts","../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./AnimationState":"src/animation/AnimationState.ts"}],"src/core/EventsManager.ts":[function(require,module,exports) {
+},{"../core/Game":"src/core/Game.ts","../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./AnimationState":"src/animation/AnimationState.ts"}],"src/level/LevelLoader.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -601,6 +568,86 @@ Object.defineProperty(exports, "__esModule", {
 
 var Animation_1 = __importDefault(require("../animation/Animation"));
 
+var Game_1 = require("../core/Game");
+
+var LevelLoader =
+/** @class */
+function () {
+  function LevelLoader(game) {
+    this.isLoading = false;
+    this.hasLoaded = true;
+    this._game = game;
+  }
+
+  LevelLoader.prototype.loadLevel = function (newLevel) {
+    var _this = this;
+
+    var animationTime = 1500;
+
+    this._game.currentGameStates.push(Game_1.GameStates.ANIMATING);
+
+    this._game.currentAnimation = new Animation_1.default(this._game, animationTime);
+    setTimeout(function () {
+      _this._game.currentGameStates = _this._game.currentGameStates.filter(function (state) {
+        return state !== Game_1.GameStates.INTRO;
+      });
+
+      _this._game.currentGameStates.push(Game_1.GameStates.RUNNING);
+    }, animationTime / 2);
+  };
+
+  return LevelLoader;
+}();
+
+exports.default = LevelLoader;
+},{"../animation/Animation":"src/animation/Animation.ts","../core/Game":"src/core/Game.ts"}],"src/core/AssetsLoader.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var constants_1 = require("../utils/constants");
+
+var AssetsLoader =
+/** @class */
+function () {
+  function AssetsLoader() {}
+
+  AssetsLoader.prototype.loadAssets = function () {
+    var img = new Image();
+    img.src = constants_1.ASSETS_PATH + "/monochrome1.png";
+    return img;
+  };
+
+  return AssetsLoader;
+}();
+
+exports.default = AssetsLoader;
+},{"../utils/constants":"src/utils/constants.ts"}],"src/core/AssetsManager.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var AssetsManager =
+/** @class */
+function () {
+  function AssetsManager() {}
+
+  AssetsManager.tileset = null;
+  return AssetsManager;
+}();
+
+exports.default = AssetsManager;
+},{}],"src/core/EventsManager.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var directions_1 = require("../utils/directions");
 
 var Game_1 = require("./Game");
@@ -612,6 +659,12 @@ function () {
     this.game = game;
     this.initializeEvents();
   }
+  /* TODO(tulio) */
+
+
+  EventsManager.prototype.handleEvents = function () {
+    throw new Error("Not Implemented");
+  };
 
   EventsManager.prototype.initializeEvents = function () {
     var _this = this;
@@ -638,9 +691,11 @@ function () {
 
         case 'Enter':
           {
-            if (_this.game.currentGameState === Game_1.GameStates.INTRO) {
-              _this.game.currentAnimation = new Animation_1.default(_this.game, 1500);
-              _this.game.currentGameState = Game_1.GameStates.ANIMATING;
+            /* Mais fácil fazer um HashMap */
+            if (_this.game.currentGameStates.find(function (state) {
+              return state === Game_1.GameStates.INTRO;
+            }) === Game_1.GameStates.INTRO) {
+              _this.game.levelLoader.loadLevel();
             }
 
             break;
@@ -648,10 +703,9 @@ function () {
 
         case 'Escape':
           {
-            if (_this.game.currentGameState === Game_1.GameStates.RUNNING) {
-              _this.game.currentGameState = Game_1.GameStates.INTRO;
-            }
-
+            // if (this.game.currentGameState === GameStates.RUNNING) {
+            //     this.game.currentGameState = GameStates.INTRO;
+            // }
             break;
           }
       }
@@ -675,7 +729,7 @@ function () {
 }();
 
 exports.default = EventsManager;
-},{"../animation/Animation":"src/animation/Animation.ts","../utils/directions":"src/utils/directions.ts","./Game":"src/core/Game.ts"}],"src/core/Renderer.ts":[function(require,module,exports) {
+},{"../utils/directions":"src/utils/directions.ts","./Game":"src/core/Game.ts"}],"src/core/Renderer.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -693,6 +747,8 @@ var AssetsManager_1 = __importDefault(require("./AssetsManager"));
 var Tilemap_1 = __importDefault(require("../level/Tilemap"));
 
 var constants_1 = require("../utils/constants");
+
+var colors_1 = require("../utils/colors");
 
 var Renderer =
 /** @class */
@@ -727,7 +783,7 @@ function () {
     animation.draw(this.ctx);
   };
 
-  Renderer.prototype.draw = function (level) {
+  Renderer.prototype.draw = function (game, level) {
     this.clear();
     this.drawBackground(level);
     this.drawObjects(level);
@@ -755,11 +811,11 @@ function () {
     level.map.objects.forEach(function (r, i) {
       r.forEach(function (c, j) {
         if (c === 1) {
-          _this.ctx.fillStyle = "#FFFFFF";
+          _this.ctx.fillStyle = colors_1.Colors.WHITE;
 
           _this.ctx.fillRect(level.map.levelTileWidth * j, level.map.levelTileHeight * i, level.map.levelTileWidth, level.map.levelTileHeight);
 
-          _this.ctx.fillStyle = "#000000";
+          _this.ctx.fillStyle = colors_1.Colors.BLACK;
         }
       });
     });
@@ -777,7 +833,7 @@ function () {
 }();
 
 exports.default = Renderer;
-},{"./AssetsManager":"src/core/AssetsManager.ts","../level/Tilemap":"src/level/Tilemap.ts","../utils/constants":"src/utils/constants.ts"}],"src/core/Game.ts":[function(require,module,exports) {
+},{"./AssetsManager":"src/core/AssetsManager.ts","../level/Tilemap":"src/level/Tilemap.ts","../utils/constants":"src/utils/constants.ts","../utils/colors":"src/utils/colors.ts"}],"src/core/Game.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -792,6 +848,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.GameStates = void 0;
 
 var Level_1 = __importDefault(require("../level/Level"));
+
+var LevelLoader_1 = __importDefault(require("../level/LevelLoader"));
 
 var directions_1 = require("../utils/directions");
 
@@ -824,7 +882,8 @@ function () {
     this._assetsLoader = new AssetsLoader_1.default();
     this._renderer = new Renderer_1.default();
     this._eventsManager = new EventsManager_1.default(this);
-    this.currentGameState = GameStates.INTRO;
+    this.levelLoader = new LevelLoader_1.default(this);
+    this.currentGameStates = [GameStates.INTRO];
     this.initializeGame();
   }
 
@@ -845,34 +904,38 @@ function () {
   };
 
   Game.prototype.update = function () {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     /* TODO(tulio) - Melhorar */
 
 
     if ((_a = this.currentLevel) === null || _a === void 0 ? void 0 : _a.player.checkCollision(this.currentLevel)) {
       if (((_b = this.currentLevel) === null || _b === void 0 ? void 0 : _b.player.checkBoundaries(this.currentLevel)) === directions_1.Directions.NONE) (_c = this.currentLevel) === null || _c === void 0 ? void 0 : _c.player.move();else {
-        this.currentLevel = new Level_1.default();
+        this.currentLevel = new Level_1.default((_d = this.currentLevel) === null || _d === void 0 ? void 0 : _d.player);
       }
     }
   };
 
   Game.prototype.draw = function () {
-    switch (this.currentGameState) {
-      case GameStates.INTRO:
-        this._renderer.drawIntro();
+    var _this = this;
 
-        break;
+    this.currentGameStates.forEach(function (state) {
+      switch (state) {
+        case GameStates.INTRO:
+          _this._renderer.drawIntro();
 
-      case GameStates.RUNNING:
-        this._renderer.draw(this.currentLevel);
+          break;
 
-        break;
+        case GameStates.RUNNING:
+          _this._renderer.draw(_this, _this.currentLevel);
 
-      case GameStates.ANIMATING:
-        this._renderer.drawAnimation(this);
+          break;
 
-        break;
-    }
+        case GameStates.ANIMATING:
+          _this._renderer.drawAnimation(_this);
+
+          break;
+      }
+    });
   };
 
   Game.prototype.run = function () {
@@ -887,7 +950,7 @@ function () {
 }();
 
 exports.default = Game;
-},{"../level/Level":"src/level/Level.ts","../utils/directions":"src/utils/directions.ts","./AssetsLoader":"src/core/AssetsLoader.ts","./AssetsManager":"src/core/AssetsManager.ts","./EventsManager":"src/core/EventsManager.ts","./Renderer":"src/core/Renderer.ts"}],"src/index.ts":[function(require,module,exports) {
+},{"../level/Level":"src/level/Level.ts","../level/LevelLoader":"src/level/LevelLoader.ts","../utils/directions":"src/utils/directions.ts","./AssetsLoader":"src/core/AssetsLoader.ts","./AssetsManager":"src/core/AssetsManager.ts","./EventsManager":"src/core/EventsManager.ts","./Renderer":"src/core/Renderer.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -931,7 +994,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60511" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51050" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

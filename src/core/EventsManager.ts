@@ -9,6 +9,11 @@ export default class EventsManager {
         this.initializeEvents();
     }
 
+    /* TODO(tulio) */
+    handleEvents(): never {
+        throw new Error("Not Implemented");
+    }
+
     initializeEvents() {
         window.onkeydown = (e: KeyboardEvent) => {
             switch (e.key) {
@@ -17,16 +22,16 @@ export default class EventsManager {
                 case 'a': this.game.currentLevel?.player.setVelocity(Directions.LEFT); break;
                 case 'd': this.game.currentLevel?.player.setVelocity(Directions.RIGHT); break;
                 case 'Enter': {
-                    if (this.game.currentGameState === GameStates.INTRO){
-                        this.game.currentAnimation= new Animation(this.game,1500);
-                        this.game.currentGameState = GameStates.ANIMATING;
+                    /* Mais fácil fazer um HashMap */
+                    if (this.game.currentGameStates.find((state: GameStates) => state === GameStates.INTRO) === GameStates.INTRO) {
+                        this.game.levelLoader.loadLevel();
                     }
                     break;
                 }
                 case 'Escape': {
-                    if (this.game.currentGameState === GameStates.RUNNING){
-                        this.game.currentGameState = GameStates.INTRO;
-                    }
+                    // if (this.game.currentGameState === GameStates.RUNNING) {
+                    //     this.game.currentGameState = GameStates.INTRO;
+                    // }
                     break;
                 }
             }

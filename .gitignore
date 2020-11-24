@@ -1,1 +1,6 @@
-node_modules
+node_modules/
+dist/
+.codesandbox/
+.cache/
+debug.log
+package-lock.json

@@ -9,7 +9,7 @@ export default class Animation {
     state: AnimationState;
     game: Game;
 
-    constructor(game: Game, duration: number = 1000) {
+    constructor(game: Game, duration: number = 3000) {
         this.game = game;
         this.duration = duration;
         this.state = new AnimationState();
@@ -23,8 +23,8 @@ export default class Animation {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.fillStyle = Colors.BLACK;
-        ctx.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT)
+        // ctx.fillStyle = Colors.BLACK;
+        // ctx.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT)
         ctx.fillStyle = Colors.RED;
         const deltaTime = (this.state.elapsedTime - this.state.startTime)/this.duration;
         const x = Math.sin(Math.PI * deltaTime) * WINDOW_WIDTH;
@@ -33,7 +33,7 @@ export default class Animation {
 
     finish() {
         /* Linkar Animacoes */
-        this.game.currentGameState = GameStates.RUNNING;
+        this.game.currentGameStates = this.game.currentGameStates.filter((state:GameStates)=>state === GameStates.RUNNING);
     }
 
 }
