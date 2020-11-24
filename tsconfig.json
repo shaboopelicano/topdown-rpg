@@ -11,6 +11,12 @@
       "dom"
     ],
     "rootDir": "src",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "exclude":[
+        "node_modules/",
+        "dist/"
+      ]
+    },
   }
 }
