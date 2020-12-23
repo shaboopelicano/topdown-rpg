@@ -10,6 +10,7 @@ const Tilemap : any = {
     grass6: new Tile(102, 0, 16, 16),        
     grass7: new Tile(119, 0, 16, 16),
     player:new Tile(425, 0, 16, 16),
+    wizard:new Tile(408, 0, 16, 16),
 }
 
 export default Tilemap;

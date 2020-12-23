@@ -21,6 +21,7 @@ export default class EventsManager {
                 case 's': this.game.currentLevel?.player.setVelocity(Directions.DOWN); break;
                 case 'a': this.game.currentLevel?.player.setVelocity(Directions.LEFT); break;
                 case 'd': this.game.currentLevel?.player.setVelocity(Directions.RIGHT); break;
+                case 'Control': this.game.currentLevel?.playerInteraction();
                 case 'Enter': {
                     /* Mais fácil fazer um HashMap */
                     if (this.game.currentGameStates.find((state: GameStates) => state === GameStates.INTRO) === GameStates.INTRO) {

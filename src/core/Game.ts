@@ -1,4 +1,5 @@
 import Animation from '../animation/Animation';
+import HUD from '../hud/HUD';
 import Level from '../level/Level';
 import LevelLoader from '../level/LevelLoader';
 import { Directions } from '../utils/directions';
@@ -14,6 +15,7 @@ export default class Game {
     private _assetsLoader: AssetsLoader;
     private _renderer: Renderer;
     private _eventsManager: EventsManager
+    public hud : HUD;
     public levelLoader: LevelLoader;
     public currentGameStates: GameStates[];
     public isRunning: boolean = false;
@@ -24,8 +26,9 @@ export default class Game {
         this._assetsLoader = new AssetsLoader();
         this._renderer = new Renderer();
         this._eventsManager = new EventsManager(this);
+        this.hud = new HUD(this);
         this.levelLoader = new LevelLoader(this);
-        this.currentGameStates = [GameStates.RUNNING];
+        this.currentGameStates = [GameStates.INTRO];
         this.initializeGame();
     }
 
@@ -40,7 +43,7 @@ export default class Game {
         }
     }
 
-    update() {
+    update() {  
         /* TODO(tulio) - Melhorar */
         if (this.currentLevel?.player.checkCollision(this.currentLevel)) {
             if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE)
@@ -57,7 +60,9 @@ export default class Game {
                 case GameStates.INTRO:
                     this._renderer.drawIntro(); break;
                 case GameStates.RUNNING:
-                    this._renderer.draw(this,this.currentLevel as Level); break;
+                    this._renderer.draw(this,this.currentLevel as Level);
+                    this._renderer.drawHUD(this);
+                    break;
                 case GameStates.ANIMATING:
                     this._renderer.drawAnimation(this); break;
 

@@ -27,7 +27,7 @@ export default class Map {
 
     /* TODO(tulio) - Passar tudo para uma operação só */
     private initializeBackground() {
-        const tilemapLength = Object.keys(Tilemap).length;
+        const tilemapLength = Object.keys(Tilemap).length - 2 ;
         for (let i = 0; i < this.height; i++) {
             this.matrix.push([]);
             for (let j = 0; j < this.width; j++) {
@@ -37,7 +37,6 @@ export default class Map {
     }
 
     private initializeObjects() {
-        const tilemapLength = Object.keys(Tilemap).length;
         for (let i = 0; i < this.height; i++) {
             this.objects.push([]);
             for (let j = 0; j < this.width; j++) {
