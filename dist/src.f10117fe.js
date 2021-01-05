@@ -123,11 +123,181 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.WINDOW_HEIGHT = exports.WINDOW_WIDTH = exports.ASSETS_PATH = void 0;
+exports.SHRINK_FACTOR = exports.WINDOW_HEIGHT = exports.WINDOW_WIDTH = exports.ASSETS_PATH = void 0;
 exports.ASSETS_PATH = "/assets";
 exports.WINDOW_WIDTH = window.innerWidth;
 exports.WINDOW_HEIGHT = window.innerHeight;
-},{}],"src/hud/Lifebar.ts":[function(require,module,exports) {
+exports.SHRINK_FACTOR = 1.3;
+},{}],"src/utils/colors.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Colors = void 0;
+var Colors;
+
+(function (Colors) {
+  Colors["BLACK"] = "#000000";
+  Colors["RED"] = "#FF0000";
+  Colors["WHITE"] = "#FFFFFF";
+})(Colors = exports.Colors || (exports.Colors = {}));
+},{}],"src/hud/DialogBox.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var colors_1 = require("../utils/colors");
+
+var constants_1 = require("../utils/constants");
+
+var DialogBox =
+/** @class */
+function () {
+  function DialogBox() {
+    this.xLine1Reveal = 0;
+    this.xLine2Reveal = 0;
+    this.xLine3Reveal = 0;
+    this.xLine4Reveal = 0;
+    this.isVisible = false;
+    this.isAnimating = false;
+    this.isFadingIn = false;
+    this._textSource = "";
+    this._animationStart = 0;
+    this._animationTime = 7000;
+    this._textLine1 = "";
+    this._textLine2 = "";
+    this._textLine3 = "";
+    this._textLine4 = "";
+    this._DIALOG_BOX_HEIGHT = 100;
+    this._LINE_SEPARATOR = '/n';
+    this._FONT = '14px Georgia';
+    this._TEXT_HOR_OFFSET = 100;
+    this._TEXT_VERT_OFFSET = 25;
+    this._TEXT_LINE_SEPARATION = 20;
+    this._DIALOGBOX_TIMEOUT = 7000;
+    this._TEXT_SPEED = 12;
+    this.x = 0;
+    this.y = -this._DIALOG_BOX_HEIGHT;
+    this.w = constants_1.WINDOW_WIDTH;
+    this.h = this._DIALOG_BOX_HEIGHT;
+    this.currentLine = 1;
+  }
+
+  DialogBox.prototype.animate = function () {
+    var animationSpeed = 10;
+
+    var ellapsedTime = window.performance.now() - this._animationStart;
+
+    if (ellapsedTime < this._animationTime / 2) {
+      if (this.y < -10) this.y += animationSpeed;
+    } else {
+      this.y -= animationSpeed;
+    }
+  };
+
+  DialogBox.prototype.draw = function (ctx) {
+    if (this.isAnimating) {
+      this.animate();
+    }
+
+    ctx.save();
+    ctx.fillStyle = colors_1.Colors.BLACK;
+    ctx.globalAlpha = 0.7;
+    ctx.fillRect(this.x, this.y, this.w, this.h);
+    if (this.y < 0) this.y += 3;
+    ctx.font = this._FONT;
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = colors_1.Colors.WHITE;
+    this.drawLines(ctx);
+    this.drawLineRevelation(ctx);
+    ctx.restore();
+  };
+
+  DialogBox.prototype.setTextSource = function (text) {
+    this._textSource = text;
+
+    var _a = this._textSource.split(this._LINE_SEPARATOR),
+        l1 = _a[0],
+        l2 = _a[1],
+        l3 = _a[2],
+        l4 = _a[3];
+
+    this._textLine1 = l1 ? l1 : "";
+    this._textLine2 = l2 ? l2 : "";
+    this._textLine3 = l3 ? l3 : "";
+    this._textLine4 = l4 ? l4 : "";
+
+    if (!this.isVisible) {
+      this.revealDialogBox();
+    }
+  };
+
+  DialogBox.prototype.revealDialogBox = function () {
+    var _this = this;
+
+    this.isVisible = true;
+    this.isAnimating = true;
+    this._animationStart = window.performance.now();
+    setTimeout(function () {
+      _this.reset();
+    }, this._DIALOGBOX_TIMEOUT);
+  };
+
+  DialogBox.prototype.drawLines = function (ctx) {
+    ctx.fillText(this._textLine1, this.x + this._TEXT_HOR_OFFSET, this.y + this._TEXT_VERT_OFFSET + this._TEXT_LINE_SEPARATION * 0);
+    ctx.fillText(this._textLine2, this.x + this._TEXT_HOR_OFFSET, this.y + this._TEXT_VERT_OFFSET + this._TEXT_LINE_SEPARATION * 1);
+    ctx.fillText(this._textLine3, this.x + this._TEXT_HOR_OFFSET, this.y + this._TEXT_VERT_OFFSET + this._TEXT_LINE_SEPARATION * 2);
+    ctx.fillText(this._textLine4, this.x + this._TEXT_HOR_OFFSET, this.y + this._TEXT_VERT_OFFSET + this._TEXT_LINE_SEPARATION * 3);
+  };
+
+  DialogBox.prototype.drawLineRevelation = function (ctx) {
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = colors_1.Colors.BLACK;
+    ctx.fillRect(this.xLine1Reveal, this.y + 7, this.w, this.y + 14);
+    ctx.fillRect(this.xLine2Reveal, this.y + 28, this.w, this.y + 14);
+    ctx.fillRect(this.xLine3Reveal, this.y + 48, this.w, this.y + 14);
+    ctx.fillRect(this.xLine4Reveal, this.y + 68, this.w, this.y + 14);
+
+    if (this.currentLine === 1) {
+      this.xLine1Reveal += this._TEXT_SPEED;
+      if (this.xLine1Reveal >= this.w) this.currentLine++;
+    } else if (this.currentLine === 2) {
+      this.xLine2Reveal += this._TEXT_SPEED;
+      if (this.xLine2Reveal >= this.w) this.currentLine++;
+    } else if (this.currentLine === 3) {
+      this.xLine3Reveal += this._TEXT_SPEED;
+      if (this.xLine3Reveal >= this.w) this.currentLine++;
+    } else if (this.currentLine === 4) {
+      this.xLine4Reveal += this._TEXT_SPEED;
+      if (this.xLine4Reveal >= this.w) this.currentLine++;
+    }
+
+    ctx.globalAlpha = 1;
+  };
+
+  DialogBox.prototype.reset = function () {
+    this._textLine1 = "";
+    this._textLine2 = "";
+    this._textLine3 = "";
+    this._textLine4 = "";
+    this.xLine1Reveal = 0;
+    this.xLine2Reveal = 0;
+    this.xLine3Reveal = 0;
+    this.xLine4Reveal = 0;
+    this.isVisible = false;
+    this.isAnimating = false;
+    this._animationStart = 0;
+    this.currentLine = 1;
+  };
+
+  return DialogBox;
+}();
+
+exports.default = DialogBox;
+},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -158,6 +328,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var constants_1 = require("../utils/constants");
 
+var DialogBox_1 = __importDefault(require("./DialogBox"));
+
 var Lifebar_1 = __importDefault(require("./Lifebar"));
 
 var HUD =
@@ -180,23 +352,47 @@ function () {
       h = 100;
     }
 
-    this.xLine1Reveal = 0;
-    this.xLine2Reveal = 0;
-    this.xLine3Reveal = 0;
-    this.xLine4Reveal = 0;
-    this.currentLine = 1;
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
     this.lifebar = new Lifebar_1.default();
+    this.dialogBox = new DialogBox_1.default();
   }
+
+  HUD.prototype.draw = function (ctx) {
+    if (this.dialogBox.isVisible) this.dialogBox.draw(ctx);
+  };
 
   return HUD;
 }();
 
 exports.default = HUD;
-},{"../utils/constants":"src/utils/constants.ts","./Lifebar":"src/hud/Lifebar.ts"}],"src/utils/directions.ts":[function(require,module,exports) {
+},{"../utils/constants":"src/utils/constants.ts","./DialogBox":"src/hud/DialogBox.ts","./Lifebar":"src/hud/Lifebar.ts"}],"src/hud/HUDManager.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var HUDManager =
+/** @class */
+function () {
+  function HUDManager() {}
+
+  HUDManager.setHUD = function (hud) {
+    this._hud = hud;
+  };
+
+  HUDManager.getHUDInstance = function () {
+    return this._hud;
+  };
+
+  return HUDManager;
+}();
+
+exports.default = HUDManager;
+},{}],"src/utils/directions.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -318,6 +514,8 @@ function (_super) {
     _this.currentDirection = directions_1.Directions.NONE;
     _this.lastDirection = directions_1.Directions.DOWN;
     _this.tilemapEntry = "player";
+    _this.x = 700;
+    _this.y = 1400;
     return _this;
   }
 
@@ -356,10 +554,12 @@ function (_super) {
     var objMatrix = level.map.objects;
     var levelTileWidth = level.map.levelTileWidth;
     var levelTileHeight = level.map.levelTileHeight;
+    var playerWidth = levelTileWidth / constants_1.SHRINK_FACTOR;
+    var playerHeight = levelTileHeight / constants_1.SHRINK_FACTOR;
     var cXE = Math.floor((this.x + this.vX) / levelTileWidth);
-    var cXD = Math.floor((this.x + this.vX + levelTileWidth) / levelTileWidth);
+    var cXD = Math.floor((this.x + this.vX + playerWidth) / levelTileWidth);
     var cYC = Math.floor((this.y + this.vY) / levelTileHeight);
-    var cYB = Math.floor((this.y + this.vY + levelTileHeight) / levelTileHeight);
+    var cYB = Math.floor((this.y + this.vY + playerHeight) / levelTileHeight);
     if (cYC < 0 || cYC > level.map.height - 1) return true;
 
     if (objMatrix[cYC][cXE] === 1) {
@@ -453,6 +653,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var HUDManager_1 = __importDefault(require("../hud/HUDManager"));
+
 var Character_1 = __importDefault(require("./Character"));
 
 var Wizard =
@@ -460,7 +662,7 @@ var Wizard =
 function (_super) {
   __extends(Wizard, _super);
 
-  function Wizard(x, y
+  function Wizard(x, y, speech
   /* , w: number = 0, h: number = 0 */
   ) {
     if (x === void 0) {
@@ -471,9 +673,14 @@ function (_super) {
       y = 0;
     }
 
+    if (speech === void 0) {
+      speech = "";
+    }
+
     var _this = _super.call(this, x, y) || this;
 
     _this.tilemapEntry = "wizard";
+    _this._speech = speech;
     return _this;
   }
 
@@ -486,14 +693,15 @@ function (_super) {
   };
 
   Wizard.prototype.interaction = function () {
-    console.log(this.uuid);
+    var hud = HUDManager_1.default.getHUDInstance();
+    hud.dialogBox.setTextSource(this._speech);
   };
 
   return Wizard;
 }(Character_1.default);
 
 exports.default = Wizard;
-},{"./Character":"src/character/Character.ts"}],"src/level/Tile.ts":[function(require,module,exports) {
+},{"../hud/HUDManager":"src/hud/HUDManager.ts","./Character":"src/character/Character.ts"}],"src/level/Tile.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -632,7 +840,7 @@ function () {
   function Level(player) {
     this.map = new Map_1.default();
     this.player = player ? player : new Player_1.default();
-    this.characters = [new Wizard_1.default(200, 200), new Wizard_1.default(400, 400)];
+    this.characters = [new Wizard_1.default(200, 200, "Hello my name is Wizard fer "), new Wizard_1.default(400, 400, "Ha toma no cu viado du carai!")];
   }
 
   Level.prototype.playerInteraction = function () {
@@ -671,21 +879,7 @@ function () {
 }();
 
 exports.default = Level;
-},{"../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Map":"src/level/Map.ts"}],"src/utils/colors.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Colors = void 0;
-var Colors;
-
-(function (Colors) {
-  Colors["BLACK"] = "#000000";
-  Colors["RED"] = "#FF0000";
-  Colors["WHITE"] = "#FFFFFF";
-})(Colors = exports.Colors || (exports.Colors = {}));
-},{}],"src/animation/AnimationState.ts":[function(require,module,exports) {
+},{"../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -746,8 +940,6 @@ function () {
   };
 
   Animation.prototype.draw = function (ctx) {
-    // ctx.fillStyle = Colors.BLACK;
-    // ctx.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT)
     ctx.fillStyle = colors_1.Colors.RED;
     var deltaTime = (this.state.elapsedTime - this.state.startTime) / this.duration;
     var x = Math.sin(Math.PI * deltaTime) * constants_1.WINDOW_WIDTH;
@@ -794,18 +986,28 @@ function () {
   LevelLoader.prototype.loadLevel = function (newLevel) {
     var _this = this;
 
-    var animationTime = 1500;
+    var animationTime = 2000;
+    this._game.currentAnimation = new Animation_1.default(this._game, animationTime);
+    this._game.currentGameStates = this._game.currentGameStates.filter(function (state) {
+      return state !== Game_1.GameStates.INTRO;
+    });
+    this._game.gameAnimationState.isTransition = true;
+    this._game.gameAnimationState.isIntro = false;
+    this._game.isPaused = true;
 
     this._game.currentGameStates.push(Game_1.GameStates.ANIMATING);
 
-    this._game.currentAnimation = new Animation_1.default(this._game, animationTime);
     setTimeout(function () {
+      _this._game.gameAnimationState.isRunning = true;
+    }, animationTime / 2);
+    setTimeout(function () {
+      /* Tirando o intro dos estados */
       _this._game.currentGameStates = _this._game.currentGameStates.filter(function (state) {
         return state !== Game_1.GameStates.INTRO;
       });
-
-      _this._game.currentGameStates.push(Game_1.GameStates.RUNNING);
-    }, animationTime / 2);
+      _this._game.gameAnimationState.isTransition = false;
+      _this._game.isPaused = false;
+    }, animationTime);
   };
 
   return LevelLoader;
@@ -862,8 +1064,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var directions_1 = require("../utils/directions");
 
-var Game_1 = require("./Game");
-
 var EventsManager =
 /** @class */
 function () {
@@ -906,11 +1106,9 @@ function () {
 
         case 'Enter':
           {
-            /* Mais fácil fazer um HashMap */
-            if (_this.game.currentGameStates.find(function (state) {
-              return state === Game_1.GameStates.INTRO;
-            }) === Game_1.GameStates.INTRO) {
-              _this.game.levelLoader.loadLevel();
+            if (_this.game.gameAnimationState.isIntro) {
+              _this.game.isPaused = false;
+              _this.game.gameAnimationState.isIntro = false;
             }
 
             break;
@@ -944,7 +1142,28 @@ function () {
 }();
 
 exports.default = EventsManager;
-},{"../utils/directions":"src/utils/directions.ts","./Game":"src/core/Game.ts"}],"src/core/Renderer.ts":[function(require,module,exports) {
+},{"../utils/directions":"src/utils/directions.ts"}],"src/core/GameAnimationState.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var GameAnimationState =
+/** @class */
+function () {
+  function GameAnimationState() {
+    this.isIntro = true;
+    this.isTransition = false;
+    this.isRunning = false;
+    this.isDialog = false;
+  }
+
+  return GameAnimationState;
+}();
+
+exports.default = GameAnimationState;
+},{}],"src/core/Renderer.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -969,10 +1188,12 @@ var Renderer =
 /** @class */
 function () {
   function Renderer() {
+    this.introAlpha = 0.0;
     this.canvas = document.querySelector('canvas');
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
     this.ctx = this.canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
     this.tileset = AssetsManager_1.default.tileset;
   }
 
@@ -985,9 +1206,15 @@ function () {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   };
 
+  Renderer.prototype.clearAux = function () {};
+
   Renderer.prototype.drawIntro = function () {
     this.clear();
     this.ctx.fillStyle = colors_1.Colors.WHITE;
+    this.ctx.save(); // if(this.introAlpha < 1.0)
+
+    this.introAlpha += .1;
+    this.ctx.globalAlpha = this.introAlpha;
     this.ctx.font = "72px Georgia";
     this.ctx.fillText("Big smile!", constants_1.WINDOW_WIDTH / 2, constants_1.WINDOW_HEIGHT / 2);
   };
@@ -999,38 +1226,7 @@ function () {
   };
 
   Renderer.prototype.drawHUD = function (game) {
-    var hud = game.hud;
-    this.ctx.fillStyle = colors_1.Colors.BLACK; // this.ctx.globalAlpha = 0.7;
-
-    this.ctx.fillRect(hud.x, hud.y, hud.w, hud.h);
-    if (hud.y < 0) hud.y += 3;
-    this.ctx.font = "14px Georgia";
-    this.ctx.globalAlpha = 1;
-    this.ctx.fillStyle = colors_1.Colors.WHITE;
-    this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 20);
-    this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 40);
-    this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 60);
-    this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 80);
-    this.ctx.fillStyle = colors_1.Colors.BLACK;
-    this.ctx.fillRect(hud.xLine1Reveal, hud.y + 7, hud.w, hud.y + 14);
-    this.ctx.fillRect(hud.xLine2Reveal, hud.y + 28, hud.w, hud.y + 14);
-    this.ctx.fillRect(hud.xLine3Reveal, hud.y + 48, hud.w, hud.y + 14);
-    this.ctx.fillRect(hud.xLine4Reveal, hud.y + 68, hud.w, hud.y + 14);
-    var VELOCIDADE_TEXTO = 12;
-
-    if (hud.currentLine === 1) {
-      hud.xLine1Reveal += VELOCIDADE_TEXTO;
-      if (hud.xLine1Reveal >= hud.w) hud.currentLine++;
-    } else if (hud.currentLine === 2) {
-      hud.xLine2Reveal += VELOCIDADE_TEXTO;
-      if (hud.xLine2Reveal >= hud.w) hud.currentLine++;
-    } else if (hud.currentLine === 3) {
-      hud.xLine3Reveal += VELOCIDADE_TEXTO;
-      if (hud.xLine3Reveal >= hud.w) hud.currentLine++;
-    } else if (hud.currentLine === 4) {
-      hud.xLine4Reveal += VELOCIDADE_TEXTO;
-      if (hud.xLine4Reveal >= hud.w) hud.currentLine++;
-    }
+    game.hud.draw(this.ctx);
   };
 
   Renderer.prototype.draw = function (game, level) {
@@ -1084,11 +1280,13 @@ function () {
   };
 
   Renderer.prototype.drawPlayer = function (level) {
+    var shrinkFactor = 1.5;
     var tile = Tilemap_1.default[level.player.tilemapEntry];
-    this.ctx.fillRect(level.player.x, level.player.y, level.map.levelTileWidth, level.map.levelTileHeight);
-    this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h, level.player.x, level.player.y, level.map.levelTileWidth, level.map.levelTileHeight);
+    this.ctx.fillRect(level.player.x, level.player.y, level.map.levelTileWidth / constants_1.SHRINK_FACTOR, level.map.levelTileHeight / constants_1.SHRINK_FACTOR);
+    this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h, level.player.x, level.player.y, level.map.levelTileWidth / constants_1.SHRINK_FACTOR, level.map.levelTileHeight / constants_1.SHRINK_FACTOR);
   };
 
+  Renderer.CLEAR_COLOR = "#000000";
   return Renderer;
 }();
 
@@ -1109,6 +1307,8 @@ exports.GameStates = void 0;
 
 var HUD_1 = __importDefault(require("../hud/HUD"));
 
+var HUDManager_1 = __importDefault(require("../hud/HUDManager"));
+
 var Level_1 = __importDefault(require("../level/Level"));
 
 var LevelLoader_1 = __importDefault(require("../level/LevelLoader"));
@@ -1120,6 +1320,8 @@ var AssetsLoader_1 = __importDefault(require("./AssetsLoader"));
 var AssetsManager_1 = __importDefault(require("./AssetsManager"));
 
 var EventsManager_1 = __importDefault(require("./EventsManager"));
+
+var GameAnimationState_1 = __importDefault(require("./GameAnimationState"));
 
 var Renderer_1 = __importDefault(require("./Renderer"));
 
@@ -1139,6 +1341,9 @@ var Game =
 function () {
   function Game() {
     this.isRunning = false;
+    this.isPaused = true;
+    /* TODO(tulio) - tirar futuramente, por conta do carregamento duplo */
+
     this.currentLevel = null;
     this.currentAnimation = null;
     this._assetsLoader = new AssetsLoader_1.default();
@@ -1147,6 +1352,7 @@ function () {
     this.hud = new HUD_1.default(this);
     this.levelLoader = new LevelLoader_1.default(this);
     this.currentGameStates = [GameStates.INTRO];
+    this.gameAnimationState = new GameAnimationState_1.default();
     this.initializeGame();
   }
 
@@ -1164,6 +1370,8 @@ function () {
       _this.currentLevel = new Level_1.default();
       requestAnimationFrame(_this.run.bind(_this));
     };
+
+    HUDManager_1.default.setHUD(this.hud);
   };
 
   Game.prototype.update = function () {
@@ -1171,36 +1379,37 @@ function () {
     /* TODO(tulio) - Melhorar */
 
 
-    if ((_a = this.currentLevel) === null || _a === void 0 ? void 0 : _a.player.checkCollision(this.currentLevel)) {
-      if (((_b = this.currentLevel) === null || _b === void 0 ? void 0 : _b.player.checkBoundaries(this.currentLevel)) === directions_1.Directions.NONE) (_c = this.currentLevel) === null || _c === void 0 ? void 0 : _c.player.move();else {
-        this.currentLevel = new Level_1.default((_d = this.currentLevel) === null || _d === void 0 ? void 0 : _d.player);
+    if (!this.isPaused) {
+      if (this.gameAnimationState.isIntro) {} else {
+        if ((_a = this.currentLevel) === null || _a === void 0 ? void 0 : _a.player.checkCollision(this.currentLevel)) {
+          if (((_b = this.currentLevel) === null || _b === void 0 ? void 0 : _b.player.checkBoundaries(this.currentLevel)) === directions_1.Directions.NONE) (_c = this.currentLevel) === null || _c === void 0 ? void 0 : _c.player.move();else {
+            this.levelLoader.loadLevel();
+            this.currentLevel = new Level_1.default((_d = this.currentLevel) === null || _d === void 0 ? void 0 : _d.player);
+          }
+        }
       }
     }
   };
 
   Game.prototype.draw = function () {
-    var _this = this;
+    /* A ordem importa */
+    if (this.gameAnimationState.isIntro) {
+      this._renderer.drawIntro();
+    }
 
-    this.currentGameStates.forEach(function (state) {
-      switch (state) {
-        case GameStates.INTRO:
-          _this._renderer.drawIntro();
+    if (this.gameAnimationState.isRunning) {
+      this._renderer.draw(this, this.currentLevel);
+    }
+    /* if (this.gameAnimationState.isDialog) { */
 
-          break;
 
-        case GameStates.RUNNING:
-          _this._renderer.draw(_this, _this.currentLevel);
+    this._renderer.drawHUD(this);
+    /* } */
 
-          _this._renderer.drawHUD(_this);
 
-          break;
-
-        case GameStates.ANIMATING:
-          _this._renderer.drawAnimation(_this);
-
-          break;
-      }
-    });
+    if (this.gameAnimationState.isTransition) {
+      this._renderer.drawAnimation(this);
+    }
   };
 
   Game.prototype.run = function () {
@@ -1215,7 +1424,7 @@ function () {
 }();
 
 exports.default = Game;
-},{"../hud/HUD":"src/hud/HUD.ts","../level/Level":"src/level/Level.ts","../level/LevelLoader":"src/level/LevelLoader.ts","../utils/directions":"src/utils/directions.ts","./AssetsLoader":"src/core/AssetsLoader.ts","./AssetsManager":"src/core/AssetsManager.ts","./EventsManager":"src/core/EventsManager.ts","./Renderer":"src/core/Renderer.ts"}],"src/index.ts":[function(require,module,exports) {
+},{"../hud/HUD":"src/hud/HUD.ts","../hud/HUDManager":"src/hud/HUDManager.ts","../level/Level":"src/level/Level.ts","../level/LevelLoader":"src/level/LevelLoader.ts","../utils/directions":"src/utils/directions.ts","./AssetsLoader":"src/core/AssetsLoader.ts","./AssetsManager":"src/core/AssetsManager.ts","./EventsManager":"src/core/EventsManager.ts","./GameAnimationState":"src/core/GameAnimationState.ts","./Renderer":"src/core/Renderer.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict"; // import '../typescript_notes/typescriptNotes';
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1259,7 +1468,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51842" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51206" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

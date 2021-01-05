@@ -1,11 +1,16 @@
+import HUDManager from "../hud/HUDManager";
 import { Directions } from "../utils/directions";
 import Character from "./Character";
 
 export default class Wizard extends Character {
 
-    constructor(x: number = 0, y: number = 0/* , w: number = 0, h: number = 0 */) {
+    private _speech:string;
+
+    constructor(x: number = 0, y: number = 0, speech : string = "" /* , w: number = 0, h: number = 0 */) {
         super(x, y);
         this.tilemapEntry = "wizard";
+        this._speech = speech;
+
     }
 
     setVelocity(direction?: Directions): void {
@@ -16,6 +21,7 @@ export default class Wizard extends Character {
     }
 
     interaction(): void {
-        console.log(this.uuid);
+        const hud = HUDManager.getHUDInstance();
+        hud.dialogBox.setTextSource(this._speech);
     }
 }

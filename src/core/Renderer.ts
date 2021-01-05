@@ -2,25 +2,30 @@ import AssetsManager from "./AssetsManager";
 import Tilemap from '../level/Tilemap';
 import Level from "../level/Level";
 import Tile from "../level/Tile";
-import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import { WINDOW_HEIGHT, WINDOW_WIDTH , SHRINK_FACTOR } from "../utils/constants";
 import Game, { GameStates } from "./Game";
 import Animation from "../animation/Animation";
 import { Colors } from "../utils/colors";
 import Character from "../character/Character";
-
 export default class Renderer {
 
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     tileset: HTMLImageElement;
 
+    introAlpha: number = 0.0;
+
+    static readonly CLEAR_COLOR = "#000000"
+
     constructor() {
         this.canvas = document.querySelector('canvas') as HTMLCanvasElement;
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+        this.ctx.imageSmoothingEnabled = false;
         this.tileset = AssetsManager.tileset as HTMLImageElement;
     }
+
 
     setTileset(tileset: HTMLImageElement) {
         this.tileset = tileset;
@@ -31,9 +36,20 @@ export default class Renderer {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
+    clearAux() {
+
+    }
+
     drawIntro() {
         this.clear();
         this.ctx.fillStyle = Colors.WHITE;
+        this.ctx.save();
+        
+        // if(this.introAlpha < 1.0)
+            this.introAlpha += .1;
+
+        this.ctx.globalAlpha = (this.introAlpha);
+
         this.ctx.font = "72px Georgia";
         this.ctx.fillText("Big smile!", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     }
@@ -45,45 +61,7 @@ export default class Renderer {
     }
 
     drawHUD(game: Game) {
-        const hud = game.hud;
-        this.ctx.fillStyle = Colors.BLACK;
-        // this.ctx.globalAlpha = 0.7;
-        this.ctx.fillRect(hud.x, hud.y, hud.w, hud.h);
-
-        if (hud.y < 0) hud.y += 3;
-
-        this.ctx.font = "14px Georgia";
-        this.ctx.globalAlpha = 1;
-        this.ctx.fillStyle = Colors.WHITE;
-        this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 20);
-        this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 40);
-        this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 60);
-        this.ctx.fillText("TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada TesteasdsadsdadaTesteasdsadsdada", 100, hud.y + 80);
-
-        this.ctx.fillStyle = Colors.BLACK;
-        this.ctx.fillRect(hud.xLine1Reveal, hud.y + 7, hud.w, hud.y + 14);
-        this.ctx.fillRect(hud.xLine2Reveal, hud.y + 28, hud.w, hud.y + 14);
-        this.ctx.fillRect(hud.xLine3Reveal, hud.y + 48, hud.w, hud.y + 14);
-        this.ctx.fillRect(hud.xLine4Reveal, hud.y + 68, hud.w, hud.y + 14);
-
-        const VELOCIDADE_TEXTO = 12;
-
-        if (hud.currentLine === 1) {
-            hud.xLine1Reveal += VELOCIDADE_TEXTO;
-            if (hud.xLine1Reveal >= hud.w) hud.currentLine++;
-        }
-        else if (hud.currentLine === 2) {
-            hud.xLine2Reveal += VELOCIDADE_TEXTO;
-            if (hud.xLine2Reveal >= hud.w) hud.currentLine++;
-        }
-        else if (hud.currentLine === 3) {
-            hud.xLine3Reveal += VELOCIDADE_TEXTO;
-            if (hud.xLine3Reveal >= hud.w) hud.currentLine++;
-        }
-        else if (hud.currentLine === 4) {
-            hud.xLine4Reveal += VELOCIDADE_TEXTO;
-            if (hud.xLine4Reveal >= hud.w) hud.currentLine++;
-        }
+        game.hud.draw(this.ctx);
     }
 
     draw(game: Game, level: Level): void {
@@ -106,6 +84,8 @@ export default class Renderer {
                     level.map.levelTileWidth, level.map.levelTileHeight);
             });
         })
+
+
     }
 
     drawObjects(level: Level) {
@@ -136,12 +116,13 @@ export default class Renderer {
     }
 
     drawPlayer(level: Level) {
+        const shrinkFactor = 1.5;
         const tile: Tile = Tilemap[level.player.tilemapEntry];
         this.ctx.fillRect(level.player.x, level.player.y,
-            level.map.levelTileWidth, level.map.levelTileHeight);
+            level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR );
 
         this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h,
             level.player.x, level.player.y,
-            level.map.levelTileWidth, level.map.levelTileHeight);
+            level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR );
     }
 }

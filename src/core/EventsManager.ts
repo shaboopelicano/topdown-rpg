@@ -23,9 +23,9 @@ export default class EventsManager {
                 case 'd': this.game.currentLevel?.player.setVelocity(Directions.RIGHT); break;
                 case 'Control': this.game.currentLevel?.playerInteraction();
                 case 'Enter': {
-                    /* Mais fácil fazer um HashMap */
-                    if (this.game.currentGameStates.find((state: GameStates) => state === GameStates.INTRO) === GameStates.INTRO) {
-                        this.game.levelLoader.loadLevel();
+                    if (this.game.gameAnimationState.isIntro) {
+                        this.game.isPaused = false;
+                        this.game.gameAnimationState.isIntro = false;
                     }
                     break;
                 }

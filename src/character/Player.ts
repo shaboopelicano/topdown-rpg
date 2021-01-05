@@ -1,5 +1,5 @@
 import Level from "../level/Level";
-import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import { SHRINK_FACTOR, WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
 import { Directions } from "../utils/directions";
 import Character from "./Character";
 
@@ -14,6 +14,8 @@ export default class Player extends Character {
         this.currentDirection = Directions.NONE;
         this.lastDirection = Directions.DOWN;
         this.tilemapEntry = "player";
+        this.x = 700;
+        this.y = 1400;
     }
     
     setVelocity(direction?: Directions): void {
@@ -35,12 +37,15 @@ export default class Player extends Character {
         const objMatrix = level.map.objects;
         const levelTileWidth = level.map.levelTileWidth;
         const levelTileHeight = level.map.levelTileHeight;
+
+        const playerWidth = levelTileWidth / SHRINK_FACTOR;
+        const playerHeight = levelTileHeight / SHRINK_FACTOR;
         
         const cXE = Math.floor((this.x + this.vX) / levelTileWidth);
-        const cXD = Math.floor((this.x + this.vX + levelTileWidth) / levelTileWidth);
+        const cXD = Math.floor((this.x + this.vX + playerWidth) / levelTileWidth);
         
         const cYC = Math.floor((this.y + this.vY) / levelTileHeight);
-        const cYB = Math.floor((this.y + this.vY + levelTileHeight) / levelTileHeight);
+        const cYB = Math.floor((this.y + this.vY + playerHeight) / levelTileHeight);
         
         if (cYC < 0 || cYC > level.map.height - 1) return true;
         

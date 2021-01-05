@@ -23,8 +23,6 @@ export default class Animation {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        // ctx.fillStyle = Colors.BLACK;
-        // ctx.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT)
         ctx.fillStyle = Colors.RED;
         const deltaTime = (this.state.elapsedTime - this.state.startTime)/this.duration;
         const x = Math.sin(Math.PI * deltaTime) * WINDOW_WIDTH;

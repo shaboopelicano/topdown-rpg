@@ -1,11 +1,13 @@
 import Animation from '../animation/Animation';
 import HUD from '../hud/HUD';
+import HUDManager from '../hud/HUDManager';
 import Level from '../level/Level';
 import LevelLoader from '../level/LevelLoader';
 import { Directions } from '../utils/directions';
 import AssetsLoader from './AssetsLoader';
 import AssetsManager from './AssetsManager';
 import EventsManager from './EventsManager';
+import GameAnimationState from './GameAnimationState';
 import Renderer from './Renderer';
 
 export enum GameStates { INTRO, PAUSED, RUNNING, ANIMATING };
@@ -15,10 +17,12 @@ export default class Game {
     private _assetsLoader: AssetsLoader;
     private _renderer: Renderer;
     private _eventsManager: EventsManager
-    public hud : HUD;
+    public hud: HUD;
     public levelLoader: LevelLoader;
     public currentGameStates: GameStates[];
     public isRunning: boolean = false;
+    public isPaused: boolean = true; /* TODO(tulio) - tirar futuramente, por conta do carregamento duplo */
+    public gameAnimationState: GameAnimationState;
     public currentLevel: Level | null = null;
     public currentAnimation: Animation | null = null;
 
@@ -29,6 +33,7 @@ export default class Game {
         this.hud = new HUD(this);
         this.levelLoader = new LevelLoader(this);
         this.currentGameStates = [GameStates.INTRO];
+        this.gameAnimationState = new GameAnimationState();
         this.initializeGame();
     }
 
@@ -41,33 +46,50 @@ export default class Game {
             this.currentLevel = new Level();
             requestAnimationFrame(this.run.bind(this));
         }
+
+        HUDManager.setHUD(this.hud);
     }
 
-    update() {  
+    update() {
         /* TODO(tulio) - Melhorar */
-        if (this.currentLevel?.player.checkCollision(this.currentLevel)) {
-            if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE)
-                this.currentLevel?.player.move();
+        if (!this.isPaused) {
+
+            if (this.gameAnimationState.isIntro) {
+
+            }
             else {
-                this.currentLevel = new Level(this.currentLevel?.player);
+                if (this.currentLevel?.player.checkCollision(this.currentLevel)) {
+                    if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE)
+                        this.currentLevel?.player.move();
+                    else {
+                        this.levelLoader.loadLevel();
+                        this.currentLevel = new Level(this.currentLevel?.player);
+                    }
+                }
             }
         }
     }
 
     draw() {
-        this.currentGameStates.forEach((state:GameStates)=>{
-            switch (state) {
-                case GameStates.INTRO:
-                    this._renderer.drawIntro(); break;
-                case GameStates.RUNNING:
-                    this._renderer.draw(this,this.currentLevel as Level);
-                    this._renderer.drawHUD(this);
-                    break;
-                case GameStates.ANIMATING:
-                    this._renderer.drawAnimation(this); break;
 
-            }
-        })
+        /* A ordem importa */
+
+        if (this.gameAnimationState.isIntro) {
+            this._renderer.drawIntro();
+        }
+
+        if (this.gameAnimationState.isRunning) {
+            this._renderer.draw(this, this.currentLevel as Level);
+        }
+
+        /* if (this.gameAnimationState.isDialog) { */
+            this._renderer.drawHUD(this);
+        /* } */
+
+        if (this.gameAnimationState.isTransition) {
+            this._renderer.drawAnimation(this);
+        }
+
     }
 
     run() {

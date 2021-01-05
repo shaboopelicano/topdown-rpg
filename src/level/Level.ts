@@ -13,9 +13,10 @@ export default class Level {
     constructor(player?: Player) {
         this.map = new Map();
         this.player = player ? player : new Player();
+        
         this.characters = [
-            new Wizard(200, 200),
-            new Wizard(400, 400),
+            new Wizard(200, 200,"Hello my name is Wizard fer "),
+            new Wizard(400, 400, "Ha toma no cu viado du carai!"),
         ];
     }
 
