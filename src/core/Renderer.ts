@@ -7,6 +7,8 @@ import Game, { GameStates } from "./Game";
 import Animation from "../animation/Animation";
 import { Colors } from "../utils/colors";
 import Character from "../character/Character";
+import EventsManager from "./EventsManager";
+import MouseEvents from "../event/MouseEvents";
 export default class Renderer {
 
     canvas: HTMLCanvasElement;
@@ -21,6 +23,7 @@ export default class Renderer {
         this.canvas = document.querySelector('canvas') as HTMLCanvasElement;
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
+        this.canvas.style.cursor = 'none';
         this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
         this.ctx.imageSmoothingEnabled = false;
         this.tileset = AssetsManager.tileset as HTMLImageElement;
@@ -70,6 +73,7 @@ export default class Renderer {
         this.drawObjects(level);
         this.drawCharacters(level);
         this.drawPlayer(level);
+        this.drawCursor(level);
 
     }
 
@@ -124,5 +128,18 @@ export default class Renderer {
         this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h,
             level.player.x, level.player.y,
             level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR );
+    }
+
+    drawCursor(level:Level){
+        const tile: Tile = Tilemap['cursor'];
+
+        let [x,y] = MouseEvents.getMouseCoordinates();
+        
+        x = Math.floor(x/level.map.levelTileWidth) * level.map.levelTileWidth;
+        y = Math.floor(y/level.map.levelTileHeight) * level.map.levelTileHeight;
+
+        this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h,
+            x , y ,
+            level.map.levelTileWidth, level.map.levelTileHeight  );
     }
 }

@@ -166,7 +166,7 @@ function () {
     this.isFadingIn = false;
     this._textSource = "";
     this._animationStart = 0;
-    this._animationTime = 7000;
+    this._animationTime = 2000;
     this._textLine1 = "";
     this._textLine2 = "";
     this._textLine3 = "";
@@ -177,7 +177,7 @@ function () {
     this._TEXT_HOR_OFFSET = 100;
     this._TEXT_VERT_OFFSET = 25;
     this._TEXT_LINE_SEPARATION = 20;
-    this._DIALOGBOX_TIMEOUT = 7000;
+    this._DIALOGBOX_TIMEOUT = 2000;
     this._TEXT_SPEED = 12;
     this.x = 0;
     this.y = -this._DIALOG_BOX_HEIGHT;
@@ -193,7 +193,7 @@ function () {
 
     if (ellapsedTime < this._animationTime / 2) {
       if (this.y < -10) this.y += animationSpeed;
-    } else {
+    } else if (this.y > -this._DIALOG_BOX_HEIGHT) {
       this.y -= animationSpeed;
     }
   };
@@ -289,6 +289,7 @@ function () {
     this.xLine4Reveal = 0;
     this.isVisible = false;
     this.isAnimating = false;
+    this.y = -this._DIALOG_BOX_HEIGHT;
     this._animationStart = 0;
     this.currentLine = 1;
   };
@@ -747,7 +748,8 @@ var Tilemap = {
   grass6: new Tile_1.default(102, 0, 16, 16),
   grass7: new Tile_1.default(119, 0, 16, 16),
   player: new Tile_1.default(425, 0, 16, 16),
-  wizard: new Tile_1.default(408, 0, 16, 16)
+  wizard: new Tile_1.default(408, 0, 16, 16),
+  cursor: new Tile_1.default(595, 204, 16, 16)
 };
 exports.default = Tilemap;
 },{"./Tile":"src/level/Tile.ts"}],"src/level/Map.ts":[function(require,module,exports) {
@@ -794,7 +796,7 @@ function () {
       this.matrix.push([]);
 
       for (var j = 0; j < this.width; j++) {
-        this.matrix[i].push(Math.floor(Math.random() * tilemapLength));
+        if (Math.random() < .1) this.matrix[i].push(Math.floor(Math.random() * (tilemapLength - 1)));
       }
     }
   };
@@ -804,7 +806,7 @@ function () {
       this.objects.push([]);
 
       for (var j = 0; j < this.width; j++) {
-        if (Math.random() < .1) this.objects[i].push(1);else this.objects[i].push(0);
+        if (Math.random() < .05) this.objects[i].push(1);else this.objects[i].push(0);
       }
     }
   };
@@ -846,7 +848,7 @@ function () {
   Level.prototype.playerInteraction = function () {
     switch (this.player.lastDirection) {
       case directions_1.Directions.DOWN:
-        this.interact(this.player.x, this.player.y + this.map.levelTileHeight / 2);
+        this.interact(this.player.x, this.player.y + this.map.levelTileHeight + this.map.levelTileHeight / 2);
         break;
 
       case directions_1.Directions.UP:
@@ -858,7 +860,7 @@ function () {
         break;
 
       case directions_1.Directions.RIGHT:
-        this.interact(this.player.x + this.map.levelTileWidth / 2, this.player.y);
+        this.interact(this.player.x + this.map.levelTileWidth + this.map.levelTileWidth / 2, this.player.y);
         break;
     }
   };
@@ -873,6 +875,13 @@ function () {
         }
       }
     });
+  };
+
+  Level.prototype.mouseInteraction = function (x, y) {
+    var matrixValueX = Math.floor(x / this.map.levelTileWidth);
+    var matrixValueY = Math.floor(y / this.map.levelTileHeight);
+    console.log(matrixValueX, matrixValueY);
+    console.log(this.map.matrix[matrixValueY][matrixValueX]);
   };
 
   return Level;
@@ -1055,8 +1064,54 @@ function () {
 }();
 
 exports.default = AssetsManager;
+},{}],"src/event/MouseEvents.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var MouseEvents =
+/** @class */
+function () {
+  function MouseEvents(game) {
+    this.game = game;
+  }
+
+  MouseEvents.prototype.init = function () {
+    window.onmousemove = this.updateMouseCoords.bind(this);
+    window.onclick = this.mouseClicked.bind(this);
+  };
+
+  MouseEvents.prototype.updateMouseCoords = function (e) {
+    MouseEvents.mouseX = e.x;
+    MouseEvents.mouseY = e.y;
+  };
+
+  MouseEvents.prototype.mouseClicked = function () {
+    var _a;
+
+    (_a = this.game.currentLevel) === null || _a === void 0 ? void 0 : _a.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+  };
+
+  MouseEvents.getMouseCoordinates = function () {
+    return [MouseEvents.mouseX, MouseEvents.mouseY];
+  };
+
+  MouseEvents.mouseX = -100;
+  MouseEvents.mouseY = -100;
+  return MouseEvents;
+}();
+
+exports.default = MouseEvents;
 },{}],"src/core/EventsManager.ts":[function(require,module,exports) {
 "use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1064,12 +1119,18 @@ Object.defineProperty(exports, "__esModule", {
 
 var directions_1 = require("../utils/directions");
 
+var MouseEvents_1 = __importDefault(require("../event/MouseEvents"));
+
 var EventsManager =
 /** @class */
 function () {
   function EventsManager(game) {
     this.game = game;
+    this.mouseEvent = new MouseEvents_1.default(game);
     this.initializeEvents();
+    /* First mouse event */
+
+    window.document.dispatchEvent(new Event("mousemove"));
   }
   /* TODO(tulio) */
 
@@ -1080,6 +1141,8 @@ function () {
 
   EventsManager.prototype.initializeEvents = function () {
     var _this = this;
+
+    this.mouseEvent.init();
 
     window.onkeydown = function (e) {
       var _a, _b, _c, _d, _e;
@@ -1142,7 +1205,7 @@ function () {
 }();
 
 exports.default = EventsManager;
-},{"../utils/directions":"src/utils/directions.ts"}],"src/core/GameAnimationState.ts":[function(require,module,exports) {
+},{"../utils/directions":"src/utils/directions.ts","../event/MouseEvents":"src/event/MouseEvents.ts"}],"src/core/GameAnimationState.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1184,6 +1247,8 @@ var constants_1 = require("../utils/constants");
 
 var colors_1 = require("../utils/colors");
 
+var MouseEvents_1 = __importDefault(require("../event/MouseEvents"));
+
 var Renderer =
 /** @class */
 function () {
@@ -1192,6 +1257,7 @@ function () {
     this.canvas = document.querySelector('canvas');
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+    this.canvas.style.cursor = 'none';
     this.ctx = this.canvas.getContext('2d');
     this.ctx.imageSmoothingEnabled = false;
     this.tileset = AssetsManager_1.default.tileset;
@@ -1235,6 +1301,7 @@ function () {
     this.drawObjects(level);
     this.drawCharacters(level);
     this.drawPlayer(level);
+    this.drawCursor(level);
   };
 
   Renderer.prototype.drawBackground = function (level) {
@@ -1286,12 +1353,24 @@ function () {
     this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h, level.player.x, level.player.y, level.map.levelTileWidth / constants_1.SHRINK_FACTOR, level.map.levelTileHeight / constants_1.SHRINK_FACTOR);
   };
 
+  Renderer.prototype.drawCursor = function (level) {
+    var tile = Tilemap_1.default['cursor'];
+
+    var _a = MouseEvents_1.default.getMouseCoordinates(),
+        x = _a[0],
+        y = _a[1];
+
+    x = Math.floor(x / level.map.levelTileWidth) * level.map.levelTileWidth;
+    y = Math.floor(y / level.map.levelTileHeight) * level.map.levelTileHeight;
+    this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h, x, y, level.map.levelTileWidth, level.map.levelTileHeight);
+  };
+
   Renderer.CLEAR_COLOR = "#000000";
   return Renderer;
 }();
 
 exports.default = Renderer;
-},{"./AssetsManager":"src/core/AssetsManager.ts","../level/Tilemap":"src/level/Tilemap.ts","../utils/constants":"src/utils/constants.ts","../utils/colors":"src/utils/colors.ts"}],"src/core/Game.ts":[function(require,module,exports) {
+},{"./AssetsManager":"src/core/AssetsManager.ts","../level/Tilemap":"src/level/Tilemap.ts","../utils/constants":"src/utils/constants.ts","../utils/colors":"src/utils/colors.ts","../event/MouseEvents":"src/event/MouseEvents.ts"}],"src/core/Game.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1468,7 +1547,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51206" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53951" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

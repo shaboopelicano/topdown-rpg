@@ -1,12 +1,19 @@
 import Animation from "../animation/Animation";
 import { Directions } from "../utils/directions";
 import Game, { GameStates } from "./Game";
+import MouseEvents from '../event/MouseEvents';
 
 export default class EventsManager {
     game: Game;
+
+    mouseEvent:MouseEvents;
+
     constructor(game: Game) {
         this.game = game;
+        this.mouseEvent = new MouseEvents(game);
         this.initializeEvents();
+        /* First mouse event */
+        window.document.dispatchEvent(new Event("mousemove"));
     }
 
     /* TODO(tulio) */
@@ -15,6 +22,7 @@ export default class EventsManager {
     }
 
     initializeEvents() {
+        this.mouseEvent.init();        
         window.onkeydown = (e: KeyboardEvent) => {
             switch (e.key) {
                 case 'w': this.game.currentLevel?.player.setVelocity(Directions.UP); break;

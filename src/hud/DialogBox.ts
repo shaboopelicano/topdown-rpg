@@ -17,7 +17,7 @@ export default class DialogBox{
     public isFadingIn : boolean = false;
     private _textSource = "";
     private _animationStart = 0;
-    private _animationTime = 7000;
+    private _animationTime = 2000;
     private _textLine1 :string = "";
     private _textLine2 :string = "";
     private _textLine3 :string = "";
@@ -29,7 +29,7 @@ export default class DialogBox{
     private readonly _TEXT_HOR_OFFSET = 100;
     private readonly _TEXT_VERT_OFFSET = 25;
     private readonly _TEXT_LINE_SEPARATION = 20;
-    private readonly _DIALOGBOX_TIMEOUT = 7000;
+    private readonly _DIALOGBOX_TIMEOUT = 2000;
     private readonly _TEXT_SPEED = 12;
     
     constructor(){
@@ -48,7 +48,7 @@ export default class DialogBox{
             if(this.y < -10)
                 this.y += animationSpeed
         }
-        else{
+        else if(this.y > -this._DIALOG_BOX_HEIGHT){
             this.y -= animationSpeed
         }
 
@@ -144,6 +144,7 @@ export default class DialogBox{
         this.xLine4Reveal = 0;
         this.isVisible = false;
         this.isAnimating = false;
+        this.y = -this._DIALOG_BOX_HEIGHT;
         this._animationStart = 0;
         this.currentLine = 1;
     }

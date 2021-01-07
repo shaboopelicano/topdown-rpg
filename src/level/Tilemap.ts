@@ -11,6 +11,7 @@ const Tilemap : any = {
     grass7: new Tile(119, 0, 16, 16),
     player:new Tile(425, 0, 16, 16),
     wizard:new Tile(408, 0, 16, 16),
+    cursor:new Tile(595, 204, 16, 16)
 }
 
 export default Tilemap;
