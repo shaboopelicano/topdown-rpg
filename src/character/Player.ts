@@ -1,29 +1,33 @@
 import Level from "../level/Level";
+import Map from "../level/Map";
+import { CLASS_HERO } from "../utils/classConstants";
 import { SHRINK_FACTOR, WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
 import { Directions } from "../utils/directions";
 import Character from "./Character";
 
 export default class Player extends Character {
-    
+
     public static PLAYER_VELOCITY: number = 5;
     public currentDirection: Directions;
     public lastDirection: Directions;
-    
-    constructor() {
-        super();
+
+    constructor(map: Map) {
+        super(map);
         this.currentDirection = Directions.NONE;
         this.lastDirection = Directions.DOWN;
         this.tilemapEntry = "player";
-        this.x = 700;
-        this.y = 1400;
+        this.x = 0;
+        this.y = 0;
+        this.class = CLASS_HERO;
+        this.isCurrentTurn = true;
     }
-    
+
     setVelocity(direction?: Directions): void {
         this.currentDirection = direction as Directions;
         if (direction !== Directions.NONE) {
             this.lastDirection = direction as Directions;
         }
-        
+
         switch (direction) {
             case Directions.UP: this.vY = -Player.PLAYER_VELOCITY; break
             case Directions.DOWN: this.vY = +Player.PLAYER_VELOCITY; break
@@ -32,7 +36,7 @@ export default class Player extends Character {
             case Directions.NONE: this.vX = 0; this.vY = 0; break
         }
     }
-    
+
     checkCollision(level: Level) {
         const objMatrix = level.map.objects;
         const levelTileWidth = level.map.levelTileWidth;
@@ -40,15 +44,15 @@ export default class Player extends Character {
 
         const playerWidth = levelTileWidth / SHRINK_FACTOR;
         const playerHeight = levelTileHeight / SHRINK_FACTOR;
-        
+
         const cXE = Math.floor((this.x + this.vX) / levelTileWidth);
         const cXD = Math.floor((this.x + this.vX + playerWidth) / levelTileWidth);
-        
+
         const cYC = Math.floor((this.y + this.vY) / levelTileHeight);
         const cYB = Math.floor((this.y + this.vY + playerHeight) / levelTileHeight);
-        
+
         if (cYC < 0 || cYC > level.map.height - 1) return true;
-        
+
         if (objMatrix[cYC][cXE] === 1) {
             return false;
         }
@@ -61,10 +65,10 @@ export default class Player extends Character {
         else if (objMatrix[cYB][cXD] === 1) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     checkBoundaries(level: Level): Directions {
 
         const levelTileWidth = level.map.levelTileWidth;
@@ -72,7 +76,7 @@ export default class Player extends Character {
 
         const cX = Math.floor((this.x + this.vX + levelTileWidth / 2) / levelTileWidth);
         const cY = Math.floor((this.y + this.vY + levelTileHeight / 2) / levelTileHeight);
-        
+
         if (cX < 0) {
             this.x = WINDOW_WIDTH - levelTileWidth;
             this.y = level.player.y;
@@ -93,13 +97,10 @@ export default class Player extends Character {
         }
         return Directions.NONE;
     }
-    
-    move(): void {
-        this.x += this.vX;
-        this.y += this.vY;
-    }
-    
+
     interaction(): void {
         throw new Error("Method not implemented.");
     }
+
+
 }

@@ -41,7 +41,7 @@ export default class Map {
         for (let i = 0; i < this.height; i++) {
             this.objects.push([]);
             for (let j = 0; j < this.width; j++) {
-                if (Math.random() < .05)
+                if (Math.random() < .01)
                     this.objects[i].push(1);
                 else
                     this.objects[i].push(0);

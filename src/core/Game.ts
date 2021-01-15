@@ -1,4 +1,6 @@
 import Animation from '../animation/Animation';
+import Character from '../character/Character';
+import Player from '../character/Player';
 import HUD from '../hud/HUD';
 import HUDManager from '../hud/HUDManager';
 import Level from '../level/Level';
@@ -20,10 +22,10 @@ export default class Game {
     public hud: HUD;
     public levelLoader: LevelLoader;
     public currentGameStates: GameStates[];
-    public isRunning: boolean = false;
-    public isPaused: boolean = true; /* TODO(tulio) - tirar futuramente, por conta do carregamento duplo */
+    public isRunning: boolean = true;
+    public isPaused: boolean = false; /* TODO(tulio) - tirar futuramente, por conta do carregamento duplo */
     public gameAnimationState: GameAnimationState;
-    public currentLevel: Level | null = null;
+    public currentLevel: Level | null = new Level();
     public currentAnimation: Animation | null = null;
 
     constructor() {
@@ -43,7 +45,6 @@ export default class Game {
             AssetsManager.tileset = tileset;
             this._renderer.setTileset(tileset);
             this.isRunning = true;
-            this.currentLevel = new Level();
             requestAnimationFrame(this.run.bind(this));
         }
 
@@ -53,19 +54,23 @@ export default class Game {
     update() {
         /* TODO(tulio) - Melhorar */
         if (!this.isPaused) {
-
             if (this.gameAnimationState.isIntro) {
 
             }
             else {
                 if (this.currentLevel?.player.checkCollision(this.currentLevel)) {
-                    if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE)
+                    if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE){
                         this.currentLevel?.player.move();
+                    }
                     else {
                         this.levelLoader.loadLevel();
                         this.currentLevel = new Level(this.currentLevel?.player);
                     }
                 }
+
+                this.currentLevel?.characters.forEach((char:Character)=>{
+                    char.move();
+                })
             }
         }
     }

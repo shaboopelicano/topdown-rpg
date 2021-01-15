@@ -142,8 +142,63 @@ var Colors;
   Colors["RED"] = "#FF0000";
   Colors["WHITE"] = "#FFFFFF";
 })(Colors = exports.Colors || (exports.Colors = {}));
+},{}],"src/hud/Box.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Box =
+/** @class */
+function () {
+  function Box() {
+    this.x = 0;
+    this.y = 0;
+    this.w = 0;
+    this.h = 0;
+    this.isVisible = false;
+    this.isAnimating = false;
+  }
+
+  return Box;
+}();
+
+exports.default = Box;
 },{}],"src/hud/DialogBox.ts":[function(require,module,exports) {
 "use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) {
+        if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+      }
+    };
+
+    return _extendStatics(d, b);
+  };
+
+  return function (d, b) {
+    _extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -153,37 +208,42 @@ var colors_1 = require("../utils/colors");
 
 var constants_1 = require("../utils/constants");
 
+var Box_1 = __importDefault(require("./Box"));
+
 var DialogBox =
 /** @class */
-function () {
-  function DialogBox() {
-    this.xLine1Reveal = 0;
-    this.xLine2Reveal = 0;
-    this.xLine3Reveal = 0;
-    this.xLine4Reveal = 0;
-    this.isVisible = false;
-    this.isAnimating = false;
-    this.isFadingIn = false;
-    this._textSource = "";
-    this._animationStart = 0;
-    this._animationTime = 2000;
-    this._textLine1 = "";
-    this._textLine2 = "";
-    this._textLine3 = "";
-    this._textLine4 = "";
-    this._DIALOG_BOX_HEIGHT = 100;
-    this._LINE_SEPARATOR = '/n';
-    this._FONT = '14px Georgia';
-    this._TEXT_HOR_OFFSET = 100;
-    this._TEXT_VERT_OFFSET = 25;
-    this._TEXT_LINE_SEPARATION = 20;
-    this._DIALOGBOX_TIMEOUT = 2000;
-    this._TEXT_SPEED = 12;
-    this.x = 0;
-    this.y = -this._DIALOG_BOX_HEIGHT;
-    this.w = constants_1.WINDOW_WIDTH;
-    this.h = this._DIALOG_BOX_HEIGHT;
-    this.currentLine = 1;
+function (_super) {
+  __extends(DialogBox, _super);
+
+  function DialogBox(game) {
+    var _this = _super.call(this) || this;
+
+    _this.xLine1Reveal = 0;
+    _this.xLine2Reveal = 0;
+    _this.xLine3Reveal = 0;
+    _this.xLine4Reveal = 0;
+    _this.isFadingIn = false;
+    _this._textSource = "";
+    _this._animationStart = 0;
+    _this._animationTime = 2000;
+    _this._textLine1 = "";
+    _this._textLine2 = "";
+    _this._textLine3 = "";
+    _this._textLine4 = "";
+    _this._DIALOG_BOX_HEIGHT = 100;
+    _this._LINE_SEPARATOR = '/n';
+    _this._FONT = '14px Georgia';
+    _this._TEXT_HOR_OFFSET = 100;
+    _this._TEXT_VERT_OFFSET = 25;
+    _this._TEXT_LINE_SEPARATION = 20;
+    _this._DIALOGBOX_TIMEOUT = 2000;
+    _this._TEXT_SPEED = 12;
+    _this.x = 0;
+    _this.y = -_this._DIALOG_BOX_HEIGHT;
+    _this.w = constants_1.WINDOW_WIDTH;
+    _this.h = _this._DIALOG_BOX_HEIGHT;
+    _this.currentLine = 1;
+    return _this;
   }
 
   DialogBox.prototype.animate = function () {
@@ -295,171 +355,10 @@ function () {
   };
 
   return DialogBox;
-}();
+}(Box_1.default);
 
 exports.default = DialogBox;
-},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var Lifebar =
-/** @class */
-function () {
-  function Lifebar() {}
-
-  return Lifebar;
-}();
-
-exports.default = Lifebar;
-},{}],"src/hud/HUD.ts":[function(require,module,exports) {
-"use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var constants_1 = require("../utils/constants");
-
-var DialogBox_1 = __importDefault(require("./DialogBox"));
-
-var Lifebar_1 = __importDefault(require("./Lifebar"));
-
-var HUD =
-/** @class */
-function () {
-  function HUD(game, x, y, w, h) {
-    if (x === void 0) {
-      x = 0;
-    }
-
-    if (y === void 0) {
-      y = 0;
-    }
-
-    if (w === void 0) {
-      w = constants_1.WINDOW_WIDTH;
-    }
-
-    if (h === void 0) {
-      h = 100;
-    }
-
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    this.lifebar = new Lifebar_1.default();
-    this.dialogBox = new DialogBox_1.default();
-  }
-
-  HUD.prototype.draw = function (ctx) {
-    if (this.dialogBox.isVisible) this.dialogBox.draw(ctx);
-  };
-
-  return HUD;
-}();
-
-exports.default = HUD;
-},{"../utils/constants":"src/utils/constants.ts","./DialogBox":"src/hud/DialogBox.ts","./Lifebar":"src/hud/Lifebar.ts"}],"src/hud/HUDManager.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var HUDManager =
-/** @class */
-function () {
-  function HUDManager() {}
-
-  HUDManager.setHUD = function (hud) {
-    this._hud = hud;
-  };
-
-  HUDManager.getHUDInstance = function () {
-    return this._hud;
-  };
-
-  return HUDManager;
-}();
-
-exports.default = HUDManager;
-},{}],"src/utils/directions.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Directions = void 0;
-var Directions;
-
-(function (Directions) {
-  Directions[Directions["UP"] = 0] = "UP";
-  Directions[Directions["DOWN"] = 1] = "DOWN";
-  Directions[Directions["LEFT"] = 2] = "LEFT";
-  Directions[Directions["RIGHT"] = 3] = "RIGHT";
-  Directions[Directions["NONE"] = 4] = "NONE";
-})(Directions = exports.Directions || (exports.Directions = {}));
-
-;
-},{}],"src/character/Character.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var Character =
-/** @class */
-function () {
-  function Character(x, y
-  /* , w: number = 0, h: number = 0 */
-  ) {
-    if (x === void 0) {
-      x = 0;
-    }
-
-    if (y === void 0) {
-      y = 0;
-    }
-
-    this.vX = 0;
-    this.vY = 0;
-    /*     public w: number;
-        public h: number; */
-
-    this.tilemapEntry = "floor";
-    this.x = x;
-    this.y = y;
-    this.uuid = this.generateUUID();
-    /*         this.w = w;
-            this.h = h; */
-  }
-
-  Character.prototype.generateUUID = function () {
-    var sGuid = "";
-
-    for (var i = 0; i < 32; i++) {
-      sGuid += Math.floor(Math.random() * 0xF).toString(0xF);
-    }
-
-    return sGuid;
-  };
-
-  return Character;
-}();
-
-exports.default = Character;
-},{}],"src/character/Player.ts":[function(require,module,exports) {
+},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/hud/InfoBox.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -498,6 +397,407 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var colors_1 = require("../utils/colors");
+
+var constants_1 = require("../utils/constants");
+
+var Box_1 = __importDefault(require("./Box"));
+
+var InfoBox =
+/** @class */
+function (_super) {
+  __extends(InfoBox, _super);
+
+  function InfoBox(game) {
+    var _this = _super.call(this) || this;
+
+    _this._INFO_BOX_HEIGHT = constants_1.WINDOW_HEIGHT;
+    _this._INFO_BOX_WIDTH = 300;
+    _this._INFO_BOX_BACKGROUND_COLOR = colors_1.Colors.WHITE;
+    _this._INFO_BOX_TEXT_COLOR = colors_1.Colors.BLACK;
+    _this.x = constants_1.WINDOW_WIDTH - _this._INFO_BOX_WIDTH;
+    _this.y = 0;
+    _this.w = _this._INFO_BOX_WIDTH;
+    _this.h = _this._INFO_BOX_HEIGHT;
+    _this.isVisible = true;
+    _this.game = game;
+    return _this;
+  }
+
+  InfoBox.prototype.draw = function (ctx) {
+    ctx.save();
+    ctx.fillStyle = this._INFO_BOX_BACKGROUND_COLOR;
+    ctx.fillRect(this.x, this.y, this.w, this.h);
+    ctx.fillStyle = colors_1.Colors.BLACK;
+    ctx.fillRect(this.x + 10, this.y, 2, this.h);
+    ctx.fillRect(this.x + 15, this.y, 2, this.h);
+    ctx.fillRect(this.x + 20, this.y, 2, this.h);
+    ctx.fillRect(constants_1.WINDOW_WIDTH - 10, this.y, 2, this.h);
+    ctx.fillRect(constants_1.WINDOW_WIDTH - 15, this.y, 2, this.h);
+    ctx.fillRect(constants_1.WINDOW_WIDTH - 20, this.y, 2, this.h);
+    this.drawText(ctx);
+    ctx.restore();
+  };
+
+  InfoBox.prototype.drawText = function (ctx) {
+    var _this = this;
+
+    var _a;
+
+    ctx.fillStyle = this._INFO_BOX_TEXT_COLOR;
+    ctx.font = "16px Georgia";
+    var battle = (_a = this.game.currentLevel) === null || _a === void 0 ? void 0 : _a.battle;
+    battle === null || battle === void 0 ? void 0 : battle.characterList.forEach(function (char, index) {
+      var offsetLeft = 40;
+      var offsetTop = 100;
+      var lineSeparation = 35;
+      ctx.fillText(char.isCurrentTurn ? "-> " + char.getCharacterClass() : char.getCharacterClass(), constants_1.WINDOW_WIDTH - _this._INFO_BOX_WIDTH + offsetLeft, offsetTop + lineSeparation * index);
+    });
+  };
+
+  return InfoBox;
+}(Box_1.default);
+
+exports.default = InfoBox;
+},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Lifebar =
+/** @class */
+function () {
+  function Lifebar(game) {}
+
+  return Lifebar;
+}();
+
+exports.default = Lifebar;
+},{}],"src/hud/HUD.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var constants_1 = require("../utils/constants");
+
+var DialogBox_1 = __importDefault(require("./DialogBox"));
+
+var InfoBox_1 = __importDefault(require("./InfoBox"));
+
+var Lifebar_1 = __importDefault(require("./Lifebar"));
+
+var HUD =
+/** @class */
+function () {
+  function HUD(game, x, y, w, h) {
+    if (x === void 0) {
+      x = 0;
+    }
+
+    if (y === void 0) {
+      y = 0;
+    }
+
+    if (w === void 0) {
+      w = constants_1.WINDOW_WIDTH;
+    }
+
+    if (h === void 0) {
+      h = 100;
+    }
+
+    this.game = game;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.lifebar = new Lifebar_1.default(this.game);
+    this.dialogBox = new DialogBox_1.default(this.game);
+    this.infoBox = new InfoBox_1.default(this.game);
+  }
+
+  HUD.prototype.draw = function (ctx) {
+    if (this.dialogBox.isVisible) this.dialogBox.draw(ctx);
+    if (this.infoBox.isVisible) this.infoBox.draw(ctx);
+  };
+
+  return HUD;
+}();
+
+exports.default = HUD;
+},{"../utils/constants":"src/utils/constants.ts","./DialogBox":"src/hud/DialogBox.ts","./InfoBox":"src/hud/InfoBox.ts","./Lifebar":"src/hud/Lifebar.ts"}],"src/hud/HUDManager.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var HUDManager =
+/** @class */
+function () {
+  function HUDManager() {}
+
+  HUDManager.setHUD = function (hud) {
+    this._hud = hud;
+  };
+
+  HUDManager.getHUDInstance = function () {
+    return this._hud;
+  };
+
+  return HUDManager;
+}();
+
+exports.default = HUDManager;
+},{}],"src/utils/classConstants.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.CLASS_WIZARD = exports.CLASS_HERO = exports.CLASS_CHARACTER = void 0;
+exports.CLASS_CHARACTER = "Character";
+exports.CLASS_HERO = "Hero";
+exports.CLASS_WIZARD = "Wizard";
+},{}],"src/utils/directions.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Directions = void 0;
+var Directions;
+
+(function (Directions) {
+  Directions[Directions["UP"] = 0] = "UP";
+  Directions[Directions["DOWN"] = 1] = "DOWN";
+  Directions[Directions["LEFT"] = 2] = "LEFT";
+  Directions[Directions["RIGHT"] = 3] = "RIGHT";
+  Directions[Directions["NONE"] = 4] = "NONE";
+})(Directions = exports.Directions || (exports.Directions = {}));
+
+;
+},{}],"src/character/Character.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var directions_1 = require("../utils/directions");
+
+var classConstants_1 = require("../utils/classConstants");
+
+var Character =
+/** @class */
+function () {
+  function Character(map, x, y, isMoving
+  /* , w: number = 0, h: number = 0 */
+  ) {
+    if (x === void 0) {
+      x = 0;
+    }
+
+    if (y === void 0) {
+      y = 0;
+    }
+
+    if (isMoving === void 0) {
+      isMoving = false;
+    }
+
+    this.vX = 0;
+    this.vY = 0;
+    this.isCurrentTurn = false;
+    this.currentMovingTargetY = 0;
+    this.currentMovingTargetX = 0;
+    this._MOVE_TOWARDS_SPEED = 5;
+    this.class = classConstants_1.CLASS_CHARACTER;
+    /*     public w: number;
+        public h: number; */
+
+    this.tilemapEntry = "floor";
+    this.x = x;
+    this.y = y;
+    this.uuid = this.generateUUID();
+    this.isMoving = isMoving;
+    this.currentPath = [];
+    this.currentMap = map;
+    /*         this.w = w;
+            this.h = h; */
+  }
+
+  Character.prototype.generateUUID = function () {
+    var sGuid = "";
+
+    for (var i = 0; i < 32; i++) {
+      sGuid += Math.floor(Math.random() * 0xF).toString(0xF);
+    }
+
+    return sGuid;
+  };
+
+  Character.prototype.move = function () {
+    if (this.isMoving) {
+      this.moveTowards();
+    }
+  };
+
+  Character.prototype.moveTowards = function ()
+  /* x: number, y: number */
+  {
+    if (this.currentPath.length > 0) {
+      var target = this.currentPath[0];
+      this.targetVelocity(target);
+      var xPosition = Math.floor(this.x / this.currentMap.levelTileWidth);
+      var yPosition = Math.floor(this.y / this.currentMap.levelTileHeight);
+      this.y += this.vY;
+      this.x += this.vX;
+      this.vX = 0;
+      this.vY = 0;
+
+      if (xPosition === target[0] && yPosition === target[1]) {
+        this.currentPath.shift();
+      }
+    } else {
+      this.isMoving = false;
+    }
+  };
+
+  Character.prototype.targetVelocity = function (target) {
+    switch (target[2]) {
+      /* é a direção */
+      case directions_1.Directions.UP:
+        this.vY = -this._MOVE_TOWARDS_SPEED;
+        break;
+
+      case directions_1.Directions.DOWN:
+        this.vY = +this._MOVE_TOWARDS_SPEED;
+        break;
+
+      case directions_1.Directions.LEFT:
+        this.vX = -this._MOVE_TOWARDS_SPEED;
+        break;
+
+      case directions_1.Directions.RIGHT:
+        this.vX = +this._MOVE_TOWARDS_SPEED;
+        break;
+
+      case directions_1.Directions.NONE:
+        this.vX = 0;
+        this.vY = 0;
+        break;
+    }
+  };
+
+  Character.prototype.calculatePath = function (map) {
+    /* Limpando o caminho */
+    this.currentPath = [];
+    var targetCoords = [Math.floor(this.currentMovingTargetX / map.levelTileWidth), Math.floor(this.currentMovingTargetY / map.levelTileHeight)];
+    var playerCoords = [Math.floor(this.x / map.levelTileWidth), Math.floor(this.y / map.levelTileHeight)];
+    var currentTile = playerCoords;
+    /*
+    Vai caminhando conforme a diferença entre os eixos
+    Vai diminuindo a diferença a partir dos maiores
+    */
+
+    do {
+      var targetX = targetCoords[0];
+      var targetY = targetCoords[1];
+      var currentX = currentTile[0];
+      var currentY = currentTile[1];
+      var diffX = Math.abs(targetX - currentX);
+      var diffY = Math.abs(targetY - currentY);
+      var direction = directions_1.Directions.NONE;
+
+      if (diffX > diffY) {
+        if (targetCoords[0] > currentTile[0]) {
+          currentTile = [currentTile[0] + 1, currentTile[1]];
+          direction = directions_1.Directions.RIGHT;
+        } else {
+          currentTile = [currentTile[0] - 1, currentTile[1]];
+          direction = directions_1.Directions.LEFT;
+        }
+      } else {
+        if (targetCoords[1] > currentTile[1]) {
+          currentTile = [currentTile[0], currentTile[1] + 1];
+          direction = directions_1.Directions.DOWN;
+        } else {
+          currentTile = [currentTile[0], currentTile[1] - 1];
+          direction = directions_1.Directions.UP;
+        }
+      }
+
+      this.currentPath.push([currentTile[0], currentTile[1], direction]);
+    } while (currentTile[0] !== targetCoords[0] || currentTile[1] !== targetCoords[1]);
+  };
+
+  Character.prototype.startMovingTo = function (x, y, map) {
+    this.isMoving = true;
+    this.currentMovingTargetX = x;
+    this.currentMovingTargetY = y;
+    this.calculatePath(map);
+  };
+
+  Character.prototype.getCharacterClass = function () {
+    return this.class;
+  };
+
+  return Character;
+}();
+
+exports.default = Character;
+},{"../utils/directions":"src/utils/directions.ts","../utils/classConstants":"src/utils/classConstants.ts"}],"src/character/Player.ts":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) {
+        if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+      }
+    };
+
+    return _extendStatics(d, b);
+  };
+
+  return function (d, b) {
+    _extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var classConstants_1 = require("../utils/classConstants");
+
 var constants_1 = require("../utils/constants");
 
 var directions_1 = require("../utils/directions");
@@ -509,14 +809,16 @@ var Player =
 function (_super) {
   __extends(Player, _super);
 
-  function Player() {
-    var _this = _super.call(this) || this;
+  function Player(map) {
+    var _this = _super.call(this, map) || this;
 
     _this.currentDirection = directions_1.Directions.NONE;
     _this.lastDirection = directions_1.Directions.DOWN;
     _this.tilemapEntry = "player";
-    _this.x = 700;
-    _this.y = 1400;
+    _this.x = 0;
+    _this.y = 0;
+    _this.class = classConstants_1.CLASS_HERO;
+    _this.isCurrentTurn = true;
     return _this;
   }
 
@@ -601,11 +903,6 @@ function (_super) {
     return directions_1.Directions.NONE;
   };
 
-  Player.prototype.move = function () {
-    this.x += this.vX;
-    this.y += this.vY;
-  };
-
   Player.prototype.interaction = function () {
     throw new Error("Method not implemented.");
   };
@@ -615,7 +912,7 @@ function (_super) {
 }(Character_1.default);
 
 exports.default = Player;
-},{"../utils/constants":"src/utils/constants.ts","../utils/directions":"src/utils/directions.ts","./Character":"src/character/Character.ts"}],"src/character/Wizard.ts":[function(require,module,exports) {
+},{"../utils/classConstants":"src/utils/classConstants.ts","../utils/constants":"src/utils/constants.ts","../utils/directions":"src/utils/directions.ts","./Character":"src/character/Character.ts"}],"src/character/Wizard.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -656,6 +953,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var HUDManager_1 = __importDefault(require("../hud/HUDManager"));
 
+var classConstants_1 = require("../utils/classConstants");
+
 var Character_1 = __importDefault(require("./Character"));
 
 var Wizard =
@@ -663,7 +962,7 @@ var Wizard =
 function (_super) {
   __extends(Wizard, _super);
 
-  function Wizard(x, y, speech
+  function Wizard(map, x, y, speech
   /* , w: number = 0, h: number = 0 */
   ) {
     if (x === void 0) {
@@ -678,18 +977,15 @@ function (_super) {
       speech = "";
     }
 
-    var _this = _super.call(this, x, y) || this;
+    var _this = _super.call(this, map, x, y) || this;
 
     _this.tilemapEntry = "wizard";
     _this._speech = speech;
+    _this.class = classConstants_1.CLASS_WIZARD;
     return _this;
   }
 
   Wizard.prototype.setVelocity = function (direction) {
-    throw new Error("Method not implemented.");
-  };
-
-  Wizard.prototype.move = function () {
     throw new Error("Method not implemented.");
   };
 
@@ -702,7 +998,30 @@ function (_super) {
 }(Character_1.default);
 
 exports.default = Wizard;
-},{"../hud/HUDManager":"src/hud/HUDManager.ts","./Character":"src/character/Character.ts"}],"src/level/Tile.ts":[function(require,module,exports) {
+},{"../hud/HUDManager":"src/hud/HUDManager.ts","../utils/classConstants":"src/utils/classConstants.ts","./Character":"src/character/Character.ts"}],"src/level/Battle.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Battle =
+/** @class */
+function () {
+  function Battle(characterList) {
+    this.characterList = characterList;
+    this.currentCharacter = characterList[0];
+    this.nextCharacter = characterList[1];
+    this.turnCount = 0;
+  }
+
+  Battle.prototype.updateBattle = function () {};
+
+  return Battle;
+}();
+
+exports.default = Battle;
+},{}],"src/level/Tile.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -806,7 +1125,7 @@ function () {
       this.objects.push([]);
 
       for (var j = 0; j < this.width; j++) {
-        if (Math.random() < .05) this.objects[i].push(1);else this.objects[i].push(0);
+        if (Math.random() < .01) this.objects[i].push(1);else this.objects[i].push(0);
       }
     }
   };
@@ -834,6 +1153,8 @@ var Wizard_1 = __importDefault(require("../character/Wizard"));
 
 var directions_1 = require("../utils/directions");
 
+var Battle_1 = __importDefault(require("./Battle"));
+
 var Map_1 = __importDefault(require("./Map"));
 
 var Level =
@@ -841,8 +1162,13 @@ var Level =
 function () {
   function Level(player) {
     this.map = new Map_1.default();
-    this.player = player ? player : new Player_1.default();
-    this.characters = [new Wizard_1.default(200, 200, "Hello my name is Wizard fer "), new Wizard_1.default(400, 400, "Ha toma no cu viado du carai!")];
+    this.player = player ? player : new Player_1.default(this.map);
+    var w1 = new Wizard_1.default(this.map, this.map.levelTileWidth * 2, this.map.levelTileHeight * 4, "Hello my name is Wizard fer ");
+    var w2 = new Wizard_1.default(this.map, this.map.levelTileWidth * 7, this.map.levelTileHeight * 9, "Ha toma no cu viado du carai!");
+    w1.startMovingTo(5 * this.map.levelTileWidth, 5 * this.map.levelTileHeight, this.map);
+    w2.startMovingTo(1 * this.map.levelTileWidth, 3 * this.map.levelTileHeight, this.map);
+    this.characters = [w1, w2, this.player];
+    this.battle = new Battle_1.default(this.characters);
   }
 
   Level.prototype.playerInteraction = function () {
@@ -878,17 +1204,17 @@ function () {
   };
 
   Level.prototype.mouseInteraction = function (x, y) {
+    /* Cálculo repetido */
     var matrixValueX = Math.floor(x / this.map.levelTileWidth);
     var matrixValueY = Math.floor(y / this.map.levelTileHeight);
-    console.log(matrixValueX, matrixValueY);
-    console.log(this.map.matrix[matrixValueY][matrixValueX]);
+    this.player.startMovingTo(matrixValueX * this.map.levelTileWidth, matrixValueY * this.map.levelTileHeight, this.map);
   };
 
   return Level;
 }();
 
 exports.default = Level;
-},{"../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
+},{"../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1089,9 +1415,7 @@ function () {
   };
 
   MouseEvents.prototype.mouseClicked = function () {
-    var _a;
-
-    (_a = this.game.currentLevel) === null || _a === void 0 ? void 0 : _a.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+    if (this.game.currentLevel) this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
   };
 
   MouseEvents.getMouseCoordinates = function () {
@@ -1166,6 +1490,7 @@ function () {
 
         case 'Control':
           (_e = _this.game.currentLevel) === null || _e === void 0 ? void 0 : _e.playerInteraction();
+          break;
 
         case 'Enter':
           {
@@ -1216,9 +1541,9 @@ var GameAnimationState =
 /** @class */
 function () {
   function GameAnimationState() {
-    this.isIntro = true;
+    this.isIntro = false;
     this.isTransition = false;
-    this.isRunning = false;
+    this.isRunning = true;
     this.isDialog = false;
   }
 
@@ -1419,11 +1744,11 @@ var Game =
 /** @class */
 function () {
   function Game() {
-    this.isRunning = false;
-    this.isPaused = true;
+    this.isRunning = true;
+    this.isPaused = false;
     /* TODO(tulio) - tirar futuramente, por conta do carregamento duplo */
 
-    this.currentLevel = null;
+    this.currentLevel = new Level_1.default();
     this.currentAnimation = null;
     this._assetsLoader = new AssetsLoader_1.default();
     this._renderer = new Renderer_1.default();
@@ -1446,7 +1771,6 @@ function () {
       _this._renderer.setTileset(tileset);
 
       _this.isRunning = true;
-      _this.currentLevel = new Level_1.default();
       requestAnimationFrame(_this.run.bind(_this));
     };
 
@@ -1454,18 +1778,24 @@ function () {
   };
 
   Game.prototype.update = function () {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     /* TODO(tulio) - Melhorar */
 
 
     if (!this.isPaused) {
       if (this.gameAnimationState.isIntro) {} else {
         if ((_a = this.currentLevel) === null || _a === void 0 ? void 0 : _a.player.checkCollision(this.currentLevel)) {
-          if (((_b = this.currentLevel) === null || _b === void 0 ? void 0 : _b.player.checkBoundaries(this.currentLevel)) === directions_1.Directions.NONE) (_c = this.currentLevel) === null || _c === void 0 ? void 0 : _c.player.move();else {
+          if (((_b = this.currentLevel) === null || _b === void 0 ? void 0 : _b.player.checkBoundaries(this.currentLevel)) === directions_1.Directions.NONE) {
+            (_c = this.currentLevel) === null || _c === void 0 ? void 0 : _c.player.move();
+          } else {
             this.levelLoader.loadLevel();
             this.currentLevel = new Level_1.default((_d = this.currentLevel) === null || _d === void 0 ? void 0 : _d.player);
           }
         }
+
+        (_e = this.currentLevel) === null || _e === void 0 ? void 0 : _e.characters.forEach(function (char) {
+          char.move();
+        });
       }
     }
   };
@@ -1547,7 +1877,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53951" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53137" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

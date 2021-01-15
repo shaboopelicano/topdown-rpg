@@ -2,6 +2,7 @@ import Animation from "../animation/Animation";
 import { Directions } from "../utils/directions";
 import Game, { GameStates } from "./Game";
 import MouseEvents from '../event/MouseEvents';
+import Level from "../level/Level";
 
 export default class EventsManager {
     game: Game;
@@ -29,7 +30,7 @@ export default class EventsManager {
                 case 's': this.game.currentLevel?.player.setVelocity(Directions.DOWN); break;
                 case 'a': this.game.currentLevel?.player.setVelocity(Directions.LEFT); break;
                 case 'd': this.game.currentLevel?.player.setVelocity(Directions.RIGHT); break;
-                case 'Control': this.game.currentLevel?.playerInteraction();
+                case 'Control': this.game.currentLevel?.playerInteraction();break;
                 case 'Enter': {
                     if (this.game.gameAnimationState.isIntro) {
                         this.game.isPaused = false;

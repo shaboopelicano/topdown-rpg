@@ -1,3 +1,5 @@
+import Game from "../core/Game";
+
 export default class Lifebar{
-    constructor(){}
+    constructor(game:Game){}
 }

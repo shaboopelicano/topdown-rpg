@@ -1,19 +1,17 @@
+import Game from "../core/Game";
 import { Colors } from "../utils/colors";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import Box from "./Box";
 
-export default class DialogBox{
+export default class DialogBox extends Box{
 
     public currentLine:number;
-    public x: number;
-    public y: number;
-    public w: number;
-    public h: number;
+
     public xLine1Reveal : number = 0;
     public xLine2Reveal : number = 0;
     public xLine3Reveal : number = 0;
     public xLine4Reveal : number = 0;
-    public isVisible : boolean = false;
-    public isAnimating : boolean = false;
+    
     public isFadingIn : boolean = false;
     private _textSource = "";
     private _animationStart = 0;
@@ -32,7 +30,8 @@ export default class DialogBox{
     private readonly _DIALOGBOX_TIMEOUT = 2000;
     private readonly _TEXT_SPEED = 12;
     
-    constructor(){
+    constructor(game:Game){
+        super();
         this.x = 0;
         this.y = -this._DIALOG_BOX_HEIGHT;
         this.w = WINDOW_WIDTH;

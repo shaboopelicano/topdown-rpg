@@ -6,9 +6,9 @@ export default class GameAnimationState{
     public isDialog: boolean;
 
     constructor(){
-        this.isIntro = true;
+        this.isIntro = false;
         this.isTransition = false;
-        this.isRunning = false;
+        this.isRunning = true;
         this.isDialog = false;
     }
 
