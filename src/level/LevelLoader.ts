@@ -11,14 +11,24 @@ export default class LevelLoader {
     }
 
     public loadLevel(newLevel?: Level) {
-        const animationTime = 1500;
-        this._game.currentGameStates.push(GameStates.ANIMATING);
+
+        const animationTime = 2000;
         this._game.currentAnimation = new Animation(this._game, animationTime);
+        this._game.currentGameStates = this._game.currentGameStates.filter((state: GameStates) => state !== GameStates.INTRO);
+        this._game.gameAnimationState.isTransition = true;
+        this._game.gameAnimationState.isIntro = false;
+        this._game.isPaused = true;
+        this._game.currentGameStates.push(GameStates.ANIMATING);
+        
         setTimeout(() => {
+            this._game.gameAnimationState.isRunning = true;
+        }, animationTime/2);
+        setTimeout(() => {
+            /* Tirando o intro dos estados */
             this._game.currentGameStates = this._game.currentGameStates.filter((state: GameStates) => state !== GameStates.INTRO);
-            this._game.currentGameStates.push(GameStates.RUNNING);
-            
-        }, animationTime / 2);
+            this._game.gameAnimationState.isTransition = false;
+            this._game.isPaused = false;
+        }, animationTime);
     }
 
 

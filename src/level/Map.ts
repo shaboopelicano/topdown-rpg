@@ -27,21 +27,21 @@ export default class Map {
 
     /* TODO(tulio) - Passar tudo para uma operação só */
     private initializeBackground() {
-        const tilemapLength = Object.keys(Tilemap).length;
+        const tilemapLength = Object.keys(Tilemap).length - 2;
         for (let i = 0; i < this.height; i++) {
             this.matrix.push([]);
             for (let j = 0; j < this.width; j++) {
-                this.matrix[i].push(Math.floor(Math.random() * tilemapLength));
+                if (Math.random() < .1)
+                    this.matrix[i].push(Math.floor(Math.random() * (tilemapLength - 1)));
             }
         }
     }
 
     private initializeObjects() {
-        const tilemapLength = Object.keys(Tilemap).length;
         for (let i = 0; i < this.height; i++) {
             this.objects.push([]);
             for (let j = 0; j < this.width; j++) {
-                if (Math.random() < .1)
+                if (Math.random() < .01)
                     this.objects[i].push(1);
                 else
                     this.objects[i].push(0);

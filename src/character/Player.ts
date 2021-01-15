@@ -1,5 +1,7 @@
 import Level from "../level/Level";
-import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import Map from "../level/Map";
+import { CLASS_HERO } from "../utils/classConstants";
+import { SHRINK_FACTOR, WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
 import { Directions } from "../utils/directions";
 import Character from "./Character";
 
@@ -7,15 +9,25 @@ export default class Player extends Character {
 
     public static PLAYER_VELOCITY: number = 5;
     public currentDirection: Directions;
+    public lastDirection: Directions;
 
-    constructor() {
-        super();
+    constructor(map: Map) {
+        super(map);
         this.currentDirection = Directions.NONE;
+        this.lastDirection = Directions.DOWN;
         this.tilemapEntry = "player";
+        this.x = 0;
+        this.y = 0;
+        this.class = CLASS_HERO;
+        this.isCurrentTurn = true;
     }
 
     setVelocity(direction?: Directions): void {
         this.currentDirection = direction as Directions;
+        if (direction !== Directions.NONE) {
+            this.lastDirection = direction as Directions;
+        }
+
         switch (direction) {
             case Directions.UP: this.vY = -Player.PLAYER_VELOCITY; break
             case Directions.DOWN: this.vY = +Player.PLAYER_VELOCITY; break
@@ -30,11 +42,14 @@ export default class Player extends Character {
         const levelTileWidth = level.map.levelTileWidth;
         const levelTileHeight = level.map.levelTileHeight;
 
+        const playerWidth = levelTileWidth / SHRINK_FACTOR;
+        const playerHeight = levelTileHeight / SHRINK_FACTOR;
+
         const cXE = Math.floor((this.x + this.vX) / levelTileWidth);
-        const cXD = Math.floor((this.x + this.vX + levelTileWidth) / levelTileWidth);
+        const cXD = Math.floor((this.x + this.vX + playerWidth) / levelTileWidth);
 
         const cYC = Math.floor((this.y + this.vY) / levelTileHeight);
-        const cYB = Math.floor((this.y + this.vY + levelTileHeight) / levelTileHeight);
+        const cYB = Math.floor((this.y + this.vY + playerHeight) / levelTileHeight);
 
         if (cYC < 0 || cYC > level.map.height - 1) return true;
 
@@ -83,9 +98,9 @@ export default class Player extends Character {
         return Directions.NONE;
     }
 
-    move(): void {
-        this.x += this.vX;
-        this.y += this.vY;
+    interaction(): void {
+        throw new Error("Method not implemented.");
     }
+
 
 }
