@@ -426,6 +426,7 @@ function (_super) {
 
   InfoBox.prototype.draw = function (ctx) {
     ctx.save();
+    ctx.clearRect(this.x, this.y, this.w, this.h);
     ctx.fillStyle = this._INFO_BOX_BACKGROUND_COLOR;
     ctx.fillRect(this.x, this.y, this.w, this.h);
     ctx.fillStyle = colors_1.Colors.BLACK;
@@ -451,7 +452,7 @@ function (_super) {
       var offsetLeft = 40;
       var offsetTop = 100;
       var lineSeparation = 35;
-      ctx.fillText(char.isCurrentTurn ? "-> " + char.getCharacterClass() : char.getCharacterClass(), constants_1.WINDOW_WIDTH - _this._INFO_BOX_WIDTH + offsetLeft, offsetTop + lineSeparation * index);
+      ctx.fillText(char.isActive ? "-> " + char.getCharacterClass() : "" + char.getCharacterClass(), constants_1.WINDOW_WIDTH - _this._INFO_BOX_WIDTH + offsetLeft, offsetTop + lineSeparation * index);
     });
   };
 
@@ -559,16 +560,6 @@ function () {
 }();
 
 exports.default = HUDManager;
-},{}],"src/utils/classConstants.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.CLASS_WIZARD = exports.CLASS_HERO = exports.CLASS_CHARACTER = void 0;
-exports.CLASS_CHARACTER = "Character";
-exports.CLASS_HERO = "Hero";
-exports.CLASS_WIZARD = "Wizard";
 },{}],"src/utils/directions.ts":[function(require,module,exports) {
 "use strict";
 
@@ -587,16 +578,36 @@ var Directions;
 })(Directions = exports.Directions || (exports.Directions = {}));
 
 ;
+},{}],"src/utils/classConstants.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.CLASS_WIZARD = exports.CLASS_HERO = exports.CLASS_CHARACTER = void 0;
+exports.CLASS_CHARACTER = "Character";
+exports.CLASS_HERO = "Hero";
+exports.CLASS_WIZARD = "Wizard";
 },{}],"src/character/Character.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.CharacterState = void 0;
 
 var directions_1 = require("../utils/directions");
 
 var classConstants_1 = require("../utils/classConstants");
+
+var CharacterState;
+
+(function (CharacterState) {
+  CharacterState[CharacterState["IDLE"] = 0] = "IDLE";
+  CharacterState[CharacterState["START"] = 1] = "START";
+  CharacterState[CharacterState["MOVING"] = 2] = "MOVING";
+  CharacterState[CharacterState["END_MOVE"] = 3] = "END_MOVE";
+})(CharacterState = exports.CharacterState || (exports.CharacterState = {}));
 
 var Character =
 /** @class */
@@ -619,8 +630,10 @@ function () {
     this.vX = 0;
     this.vY = 0;
     this.isCurrentTurn = false;
+    this.isActive = false;
     this.currentMovingTargetY = 0;
     this.currentMovingTargetX = 0;
+    this.state = CharacterState.IDLE;
     this._MOVE_TOWARDS_SPEED = 5;
     this.class = classConstants_1.CLASS_CHARACTER;
     /*     public w: number;
@@ -657,6 +670,7 @@ function () {
   /* x: number, y: number */
   {
     if (this.currentPath.length > 0) {
+      this.state = CharacterState.MOVING;
       var target = this.currentPath[0];
       this.targetVelocity(target);
       var xPosition = Math.floor(this.x / this.currentMap.levelTileWidth);
@@ -671,6 +685,7 @@ function () {
       }
     } else {
       this.isMoving = false;
+      this.state = CharacterState.END_MOVE;
     }
   };
 
@@ -743,6 +758,7 @@ function () {
   };
 
   Character.prototype.startMovingTo = function (x, y, map) {
+    this.state = CharacterState.MOVING;
     this.isMoving = true;
     this.currentMovingTargetX = x;
     this.currentMovingTargetY = y;
@@ -1146,10 +1162,15 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.LevelState = void 0;
+
+var Character_1 = require("../character/Character");
 
 var Player_1 = __importDefault(require("../character/Player"));
 
 var Wizard_1 = __importDefault(require("../character/Wizard"));
+
+var constants_1 = require("../utils/constants");
 
 var directions_1 = require("../utils/directions");
 
@@ -1157,19 +1178,69 @@ var Battle_1 = __importDefault(require("./Battle"));
 
 var Map_1 = __importDefault(require("./Map"));
 
+var LevelState;
+
+(function (LevelState) {
+  LevelState[LevelState["NPC_TURN"] = 0] = "NPC_TURN";
+  LevelState[LevelState["PLAYER_TURN"] = 1] = "PLAYER_TURN";
+})(LevelState = exports.LevelState || (exports.LevelState = {}));
+
 var Level =
 /** @class */
 function () {
   function Level(player) {
     this.map = new Map_1.default();
     this.player = player ? player : new Player_1.default(this.map);
+    this.levelState = LevelState.NPC_TURN;
     var w1 = new Wizard_1.default(this.map, this.map.levelTileWidth * 2, this.map.levelTileHeight * 4, "Hello my name is Wizard fer ");
     var w2 = new Wizard_1.default(this.map, this.map.levelTileWidth * 7, this.map.levelTileHeight * 9, "Ha toma no cu viado du carai!");
-    w1.startMovingTo(5 * this.map.levelTileWidth, 5 * this.map.levelTileHeight, this.map);
-    w2.startMovingTo(1 * this.map.levelTileWidth, 3 * this.map.levelTileHeight, this.map);
     this.characters = [w1, w2, this.player];
+    this.turnQueue = this.calculateFirstTurn();
+    this.currentCharacterTurn = this.turnQueue.shift();
     this.battle = new Battle_1.default(this.characters);
   }
+
+  Level.prototype.update = function () {
+    var currentCharacter = this.characters[this.currentCharacterTurn];
+    this.characters.forEach(function (c) {
+      return c.isActive = false;
+    });
+    currentCharacter.isActive = true;
+
+    if (this.levelState === LevelState.NPC_TURN) {
+      if (currentCharacter.state === Character_1.CharacterState.MOVING) {
+        currentCharacter.move();
+      } else if (currentCharacter.state === Character_1.CharacterState.END_MOVE) {
+        this.currentCharacterTurn = this.turnQueue.shift();
+        var nextCharacter = this.characters[this.currentCharacterTurn];
+
+        if (nextCharacter instanceof Player_1.default) {
+          this.levelState = LevelState.PLAYER_TURN;
+        } else {
+          this.levelState = LevelState.NPC_TURN;
+        }
+      } else {
+        var matrixValueX = Math.floor(Math.random() * (constants_1.WINDOW_WIDTH - 2 * this.map.levelTileWidth) / this.map.levelTileWidth);
+        var matrixValueY = Math.floor(Math.random() * (constants_1.WINDOW_HEIGHT - 2 * this.map.levelTileHeight) / this.map.levelTileHeight);
+        currentCharacter.startMovingTo(matrixValueX * this.map.levelTileWidth, matrixValueY * this.map.levelTileHeight, this.map);
+      }
+    } else {
+      if (currentCharacter.state === Character_1.CharacterState.MOVING) {
+        currentCharacter.move();
+      } else if (currentCharacter.state === Character_1.CharacterState.END_MOVE) {
+        this.turnQueue = this.calculateFirstTurn();
+        this.currentCharacterTurn = this.turnQueue.shift();
+        this.levelState = LevelState.NPC_TURN;
+      }
+    }
+  };
+
+  Level.prototype.calculateFirstTurn = function () {
+    this.characters.forEach(function (char) {
+      return char.state = Character_1.CharacterState.IDLE;
+    });
+    return [0, 1, 2];
+  };
 
   Level.prototype.playerInteraction = function () {
     switch (this.player.lastDirection) {
@@ -1214,7 +1285,7 @@ function () {
 }();
 
 exports.default = Level;
-},{"../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
+},{"../character/Character":"src/character/Character.ts","../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/constants":"src/utils/constants.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1793,9 +1864,7 @@ function () {
           }
         }
 
-        (_e = this.currentLevel) === null || _e === void 0 ? void 0 : _e.characters.forEach(function (char) {
-          char.move();
-        });
+        (_e = this.currentLevel) === null || _e === void 0 ? void 0 : _e.update();
       }
     }
   };
@@ -1877,7 +1946,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53137" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54913" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

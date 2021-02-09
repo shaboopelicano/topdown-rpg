@@ -2,6 +2,8 @@ import Map from "../level/Map";
 import { Directions } from "../utils/directions";
 import { CLASS_CHARACTER } from '../utils/classConstants';
 
+export enum CharacterState { IDLE , START , MOVING , END_MOVE }
+
 export default abstract class Character {
 
     public x: number;
@@ -11,8 +13,10 @@ export default abstract class Character {
     public uuid: string;
     public isMoving: boolean;
     public isCurrentTurn : boolean = false;
+    public isActive : boolean = false;
     public currentMovingTargetY: number = 0;
     public currentMovingTargetX: number = 0;
+    public state :CharacterState = CharacterState.IDLE;
     protected readonly _MOVE_TOWARDS_SPEED: number = 5;
     protected currentPath: any[];
     protected currentMap: Map;
@@ -51,6 +55,7 @@ export default abstract class Character {
 
     protected moveTowards(/* x: number, y: number */): void {
         if (this.currentPath.length > 0) {
+            this.state = CharacterState.MOVING;
             const target = this.currentPath[0];
             this.targetVelocity(target);
 
@@ -69,6 +74,7 @@ export default abstract class Character {
         }
         else {
             this.isMoving = false;
+            this.state = CharacterState.END_MOVE;
         }
     }
 
@@ -141,6 +147,7 @@ export default abstract class Character {
     }
 
     public startMovingTo(x: number, y: number, map: Map) {
+        this.state = CharacterState.MOVING;
         this.isMoving = true;
         this.currentMovingTargetX = x;
         this.currentMovingTargetY = y;
