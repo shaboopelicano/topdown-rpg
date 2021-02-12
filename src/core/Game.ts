@@ -68,9 +68,7 @@ export default class Game {
                     }
                 }
 
-                this.currentLevel?.characters.forEach((char:Character)=>{
-                    char.move();
-                })
+                this.currentLevel?.update();
             }
         }
     }
@@ -78,7 +76,6 @@ export default class Game {
     draw() {
 
         /* A ordem importa */
-
         if (this.gameAnimationState.isIntro) {
             this._renderer.drawIntro();
         }

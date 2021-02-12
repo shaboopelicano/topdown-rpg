@@ -24,6 +24,7 @@ export default class InfoBox extends Box {
 
     draw(ctx: CanvasRenderingContext2D) {
         ctx.save();
+        ctx.clearRect(this.x,this.y,this.w,this.h);
         ctx.fillStyle = this._INFO_BOX_BACKGROUND_COLOR;
         ctx.fillRect(this.x, this.y, this.w, this.h);
         ctx.fillStyle = Colors.BLACK;
@@ -40,6 +41,7 @@ export default class InfoBox extends Box {
     drawText(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = this._INFO_BOX_TEXT_COLOR;
         ctx.font = "16px Georgia";
+        
 
         const battle = this.game.currentLevel?.battle;
         battle?.characterList.forEach((char: Character, index: number) => {
@@ -47,7 +49,7 @@ export default class InfoBox extends Box {
             const offsetTop = 100;
             const lineSeparation = 35;
             ctx.fillText(
-                char.isCurrentTurn ? "-> " + char.getCharacterClass() : char.getCharacterClass(),
+                char.isActive ? "-> " + char.getCharacterClass() : "" + char.getCharacterClass(),
                 WINDOW_WIDTH - this._INFO_BOX_WIDTH + offsetLeft,
                 offsetTop + lineSeparation * index);
         })
