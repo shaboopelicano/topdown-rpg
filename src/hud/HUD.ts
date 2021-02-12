@@ -1,5 +1,6 @@
 import Game from "../core/Game";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
+import Cursor from "./Cursor";
 import DialogBox from "./DialogBox";
 import InfoBox from "./InfoBox";
 import Lifebar from "./Lifebar";
@@ -13,7 +14,8 @@ export default class HUD {
     public lifebar: Lifebar;
     public dialogBox: DialogBox;
     public infoBox: InfoBox;
-    private game :Game;
+    public cursor: Cursor;
+    private game: Game;
 
 
     constructor(game: Game, x: number = 0, y: number = 0, w: number = WINDOW_WIDTH, h: number = 100) {
@@ -25,9 +27,11 @@ export default class HUD {
         this.lifebar = new Lifebar(this.game);
         this.dialogBox = new DialogBox(this.game);
         this.infoBox = new InfoBox(this.game);
+        this.cursor = new Cursor(this);
     }
 
     draw(ctx: CanvasRenderingContext2D) {
+
         if (this.dialogBox.isVisible)
             this.dialogBox.draw(ctx);
         if (this.infoBox.isVisible)

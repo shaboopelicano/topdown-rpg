@@ -2,13 +2,15 @@ import AssetsManager from "./AssetsManager";
 import Tilemap from '../level/Tilemap';
 import Level from "../level/Level";
 import Tile from "../level/Tile";
-import { WINDOW_HEIGHT, WINDOW_WIDTH , SHRINK_FACTOR } from "../utils/constants";
+import { WINDOW_HEIGHT, WINDOW_WIDTH, SHRINK_FACTOR } from "../utils/constants";
 import Game, { GameStates } from "./Game";
 import Animation from "../animation/Animation";
 import { Colors } from "../utils/colors";
 import Character from "../character/Character";
 import EventsManager from "./EventsManager";
 import MouseEvents from "../event/MouseEvents";
+import HUDManager from "../hud/HUDManager";
+import { CursorState } from "../hud/Cursor";
 export default class Renderer {
 
     canvas: HTMLCanvasElement;
@@ -47,9 +49,9 @@ export default class Renderer {
         this.clear();
         this.ctx.fillStyle = Colors.WHITE;
         this.ctx.save();
-        
+
         // if(this.introAlpha < 1.0)
-            this.introAlpha += .1;
+        this.introAlpha += .1;
 
         this.ctx.globalAlpha = (this.introAlpha);
 
@@ -73,6 +75,7 @@ export default class Renderer {
         this.drawObjects(level);
         this.drawCharacters(level);
         this.drawPlayer(level);
+        this.drawHUD(game);
         this.drawCursor(level);
 
     }
@@ -122,23 +125,27 @@ export default class Renderer {
         const shrinkFactor = 1.5;
         const tile: Tile = Tilemap[level.player.tilemapEntry];
         this.ctx.fillRect(level.player.x, level.player.y,
-            level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR );
+            level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR);
 
         this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h,
             level.player.x, level.player.y,
-            level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR );
+            level.map.levelTileWidth / SHRINK_FACTOR, level.map.levelTileHeight / SHRINK_FACTOR);
     }
 
-    drawCursor(level:Level){
-        const tile: Tile = Tilemap['cursor'];
+    drawCursor(level: Level) {
 
-        let [x,y] = MouseEvents.getMouseCoordinates();
+        const cursor = HUDManager.getHUDInstance().cursor;
+        const tile: Tile = Tilemap[cursor.getCursorSprite()];
+
+        let [x, y] = MouseEvents.getMouseCoordinates();
         
-        x = Math.floor(x/level.map.levelTileWidth) * level.map.levelTileWidth;
-        y = Math.floor(y/level.map.levelTileHeight) * level.map.levelTileHeight;
+        if (cursor.state === CursorState.TARGET) {
+            x = Math.floor(x / level.map.levelTileWidth) * level.map.levelTileWidth;
+            y = Math.floor(y / level.map.levelTileHeight) * level.map.levelTileHeight;
+        }
 
         this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h,
-            x , y ,
-            level.map.levelTileWidth, level.map.levelTileHeight  );
+            x, y,
+            level.map.levelTileWidth, level.map.levelTileHeight);
     }
 }

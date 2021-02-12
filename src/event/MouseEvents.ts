@@ -1,4 +1,5 @@
 import Game from "../core/Game";
+import { CursorState } from "../hud/Cursor";
 
 export default class MouseEvents {
 
@@ -19,11 +20,24 @@ export default class MouseEvents {
     private updateMouseCoords(e: MouseEvent): void {
         MouseEvents.mouseX = e.x;
         MouseEvents.mouseY = e.y;
+        this.game.hud.cursor.updateCoordinates(MouseEvents.mouseX, MouseEvents.mouseY);
     }
 
+    /* Cursor state based click */
     private mouseClicked(): void {
-        if (this.game.currentLevel)
-            this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+
+        const cursor = this.game.hud.cursor;
+
+        switch (cursor.state) {
+            case CursorState.TARGET:
+                if (this.game.currentLevel)
+                    this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+                break;
+            case CursorState.ARROW:
+                console.log('asd');
+                break;
+                
+        }
     }
 
     public static getMouseCoordinates() {

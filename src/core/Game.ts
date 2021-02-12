@@ -85,7 +85,7 @@ export default class Game {
         }
 
         /* if (this.gameAnimationState.isDialog) { */
-            this._renderer.drawHUD(this);
+            // this._renderer.drawHUD(this);
         /* } */
 
         if (this.gameAnimationState.isTransition) {
@@ -100,5 +100,9 @@ export default class Game {
             this.draw();
             requestAnimationFrame(this.run.bind(this));
         }
+    }
+
+    getRenderer(){
+        return this._renderer;
     }
 }

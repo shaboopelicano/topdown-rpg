@@ -128,6 +128,47 @@ exports.ASSETS_PATH = "/assets";
 exports.WINDOW_WIDTH = window.innerWidth;
 exports.WINDOW_HEIGHT = window.innerHeight;
 exports.SHRINK_FACTOR = 1.3;
+},{}],"src/hud/Cursor.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.CursorState = void 0;
+var CursorState;
+
+(function (CursorState) {
+  CursorState[CursorState["ARROW"] = 0] = "ARROW";
+  CursorState[CursorState["TARGET"] = 1] = "TARGET";
+})(CursorState = exports.CursorState || (exports.CursorState = {}));
+
+var Cursor =
+/** @class */
+function () {
+  function Cursor(hud) {
+    this.state = CursorState.TARGET;
+    this._hud = hud;
+  }
+
+  Cursor.prototype.getCursorSprite = function () {
+    switch (this.state) {
+      case CursorState.ARROW:
+        return 'blackCursor';
+
+      case CursorState.TARGET:
+        return 'cursor';
+    }
+  };
+
+  Cursor.prototype.updateCoordinates = function (mouseX, mouseY) {
+    var infoBox = this._hud.infoBox;
+    if (mouseX > infoBox.x) this.state = CursorState.ARROW;else this.state = CursorState.TARGET;
+  };
+
+  return Cursor;
+}();
+
+exports.default = Cursor;
 },{}],"src/utils/colors.ts":[function(require,module,exports) {
 "use strict";
 
@@ -358,7 +399,69 @@ function (_super) {
 }(Box_1.default);
 
 exports.default = DialogBox;
-},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/hud/InfoBox.ts":[function(require,module,exports) {
+},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/level/Tile.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Tile =
+/** @class */
+function () {
+  function Tile(x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
+
+  return Tile;
+}();
+
+exports.default = Tile;
+},{}],"src/level/Tilemap.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Tile_1 = __importDefault(require("./Tile"));
+
+var Tilemap = {
+  floor: new Tile_1.default(0, 0, 16, 16),
+  grass1: new Tile_1.default(17, 0, 16, 16),
+  grass2: new Tile_1.default(34, 0, 16, 16),
+  grass3: new Tile_1.default(51, 0, 16, 16),
+  grass4: new Tile_1.default(68, 0, 16, 16),
+  grass5: new Tile_1.default(85, 0, 16, 16),
+  grass6: new Tile_1.default(102, 0, 16, 16),
+  grass7: new Tile_1.default(119, 0, 16, 16),
+  player: new Tile_1.default(425, 0, 16, 16),
+  wizard: new Tile_1.default(408, 0, 16, 16),
+  cursor: new Tile_1.default(595, 204, 16, 16),
+  blackCursor: new Tile_1.default(612, 170, 16, 16),
+  bruxo: new Tile_1.default(0, 373, 256, 256),
+  sword: new Tile_1.default(544, 136, 16, 16),
+  shield: new Tile_1.default(629, 51, 16, 16),
+  potion: new Tile_1.default(544, 221, 16, 16),
+  hourglass: new Tile_1.default(714, 204, 16, 16),
+  torch: new Tile_1.default(714, 51, 16, 16),
+  andre: new Tile_1.default(254, 374, 256, 256),
+  galvao: new Tile_1.default(509, 373, 167, 253),
+  frota: new Tile_1.default(0, 629, 278, 341),
+  supla: new Tile_1.default(273, 629, 258, 331),
+  theo: new Tile_1.default(530, 628, 258, 286)
+};
+exports.default = Tilemap;
+},{"./Tile":"src/level/Tile.ts"}],"src/hud/InfoBox.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -397,6 +500,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var Tilemap_1 = __importDefault(require("../level/Tilemap"));
+
 var colors_1 = require("../utils/colors");
 
 var constants_1 = require("../utils/constants");
@@ -415,14 +520,45 @@ function (_super) {
     _this._INFO_BOX_WIDTH = 300;
     _this._INFO_BOX_BACKGROUND_COLOR = colors_1.Colors.WHITE;
     _this._INFO_BOX_TEXT_COLOR = colors_1.Colors.BLACK;
+    _this.iconMapping = null;
     _this.x = constants_1.WINDOW_WIDTH - _this._INFO_BOX_WIDTH;
     _this.y = 0;
     _this.w = _this._INFO_BOX_WIDTH;
     _this.h = _this._INFO_BOX_HEIGHT;
     _this.isVisible = true;
     _this.game = game;
+    _this.iconMapping = {
+      attack: {
+        icon: 'sword',
+        callback: _this.attack.bind(_this)
+      },
+      defend: {
+        icon: 'shield',
+        callback: _this.defend.bind(_this)
+      },
+      item: {
+        icon: 'potion',
+        callback: _this.defend.bind(_this)
+      },
+      wait: {
+        icon: 'hourglass',
+        callback: _this.defend.bind(_this)
+      },
+      run: {
+        icon: 'torch',
+        callback: _this.defend.bind(_this)
+      }
+    };
     return _this;
   }
+
+  InfoBox.prototype.attack = function () {
+    console.log('attack');
+  };
+
+  InfoBox.prototype.defend = function () {
+    console.log('defend');
+  };
 
   InfoBox.prototype.draw = function (ctx) {
     ctx.save();
@@ -437,6 +573,8 @@ function (_super) {
     ctx.fillRect(constants_1.WINDOW_WIDTH - 15, this.y, 2, this.h);
     ctx.fillRect(constants_1.WINDOW_WIDTH - 20, this.y, 2, this.h);
     this.drawText(ctx);
+    this.drawIcons(ctx);
+    this.drawPicture(ctx);
     ctx.restore();
   };
 
@@ -456,11 +594,47 @@ function (_super) {
     });
   };
 
+  InfoBox.prototype.drawIcons = function (ctx) {
+    var tileSet = this.game.getRenderer().tileset;
+    var offsetX = 30;
+    var iconWidth = 32;
+    var iconHeight = 32;
+    var iconMargin = 20;
+    var iconNumber = 0;
+
+    for (var item in this.iconMapping) {
+      var button = this.iconMapping[item];
+      var tile = Tilemap_1.default[button.icon];
+      var imageWidth = iconWidth;
+      var imageHeight = iconHeight;
+      var imagePosX = this.x + offsetX + iconNumber * (iconWidth + iconMargin);
+      var imagePosY = 300;
+      ctx.drawImage(tileSet, tile.x, tile.y, tile.w, tile.h, imagePosX, imagePosY, imageWidth, imageHeight);
+      iconNumber++;
+    }
+  };
+
+  InfoBox.prototype.drawPicture = function (ctx) {
+    var _a;
+
+    var battle = (_a = this.game.currentLevel) === null || _a === void 0 ? void 0 : _a.battle;
+    var char = battle === null || battle === void 0 ? void 0 : battle.characterList.find(function (c) {
+      return c.isActive;
+    });
+    var tileSet = this.game.getRenderer().tileset;
+    var tile = Tilemap_1.default[char === null || char === void 0 ? void 0 : char.picture];
+    var imageWidth = 256;
+    var imageHeight = 256;
+    var imagePosX = this.x + this.w / 2 - imageWidth / 2 + 1;
+    var imagePosY = this.h - imageHeight - 25;
+    ctx.drawImage(tileSet, tile.x, tile.y, tile.w, tile.h, imagePosX, imagePosY, imageWidth, imageHeight);
+  };
+
   return InfoBox;
 }(Box_1.default);
 
 exports.default = InfoBox;
-},{"../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
+},{"../level/Tilemap":"src/level/Tilemap.ts","../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -490,6 +664,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var constants_1 = require("../utils/constants");
+
+var Cursor_1 = __importDefault(require("./Cursor"));
 
 var DialogBox_1 = __importDefault(require("./DialogBox"));
 
@@ -525,6 +701,7 @@ function () {
     this.lifebar = new Lifebar_1.default(this.game);
     this.dialogBox = new DialogBox_1.default(this.game);
     this.infoBox = new InfoBox_1.default(this.game);
+    this.cursor = new Cursor_1.default(this);
   }
 
   HUD.prototype.draw = function (ctx) {
@@ -536,7 +713,7 @@ function () {
 }();
 
 exports.default = HUD;
-},{"../utils/constants":"src/utils/constants.ts","./DialogBox":"src/hud/DialogBox.ts","./InfoBox":"src/hud/InfoBox.ts","./Lifebar":"src/hud/Lifebar.ts"}],"src/hud/HUDManager.ts":[function(require,module,exports) {
+},{"../utils/constants":"src/utils/constants.ts","./Cursor":"src/hud/Cursor.ts","./DialogBox":"src/hud/DialogBox.ts","./InfoBox":"src/hud/InfoBox.ts","./Lifebar":"src/hud/Lifebar.ts"}],"src/hud/HUDManager.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -646,6 +823,9 @@ function () {
     this.isMoving = isMoving;
     this.currentPath = [];
     this.currentMap = map;
+    var fotos = ['bruxo', 'andre', 'galvao', 'frota', 'supla', 'theo'];
+    var index = Math.floor(Math.random() * fotos.length);
+    this.picture = fotos[index];
     /*         this.w = w;
             this.h = h; */
   }
@@ -1037,57 +1217,7 @@ function () {
 }();
 
 exports.default = Battle;
-},{}],"src/level/Tile.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var Tile =
-/** @class */
-function () {
-  function Tile(x, y, w, h) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-
-  return Tile;
-}();
-
-exports.default = Tile;
-},{}],"src/level/Tilemap.ts":[function(require,module,exports) {
-"use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var Tile_1 = __importDefault(require("./Tile"));
-
-var Tilemap = {
-  floor: new Tile_1.default(0, 0, 16, 16),
-  grass1: new Tile_1.default(17, 0, 16, 16),
-  grass2: new Tile_1.default(34, 0, 16, 16),
-  grass3: new Tile_1.default(51, 0, 16, 16),
-  grass4: new Tile_1.default(68, 0, 16, 16),
-  grass5: new Tile_1.default(85, 0, 16, 16),
-  grass6: new Tile_1.default(102, 0, 16, 16),
-  grass7: new Tile_1.default(119, 0, 16, 16),
-  player: new Tile_1.default(425, 0, 16, 16),
-  wizard: new Tile_1.default(408, 0, 16, 16),
-  cursor: new Tile_1.default(595, 204, 16, 16)
-};
-exports.default = Tilemap;
-},{"./Tile":"src/level/Tile.ts"}],"src/level/Map.ts":[function(require,module,exports) {
+},{}],"src/level/Map.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1125,13 +1255,15 @@ function () {
 
 
   Map.prototype.initializeBackground = function () {
+    var TILE_LIMIT = 10; // para nao colidir com as fotos
+
     var tilemapLength = Object.keys(Tilemap_1.default).length - 2;
 
     for (var i = 0; i < this.height; i++) {
       this.matrix.push([]);
 
       for (var j = 0; j < this.width; j++) {
-        if (Math.random() < .1) this.matrix[i].push(Math.floor(Math.random() * (tilemapLength - 1)));
+        if (Math.random() < .1) this.matrix[i].push(Math.floor(Math.random() * TILE_LIMIT));
       }
     }
   };
@@ -1466,6 +1598,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var Cursor_1 = require("../hud/Cursor");
+
 var MouseEvents =
 /** @class */
 function () {
@@ -1481,10 +1615,23 @@ function () {
   MouseEvents.prototype.updateMouseCoords = function (e) {
     MouseEvents.mouseX = e.x;
     MouseEvents.mouseY = e.y;
+    this.game.hud.cursor.updateCoordinates(MouseEvents.mouseX, MouseEvents.mouseY);
   };
+  /* Cursor state based click */
+
 
   MouseEvents.prototype.mouseClicked = function () {
-    if (this.game.currentLevel) this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+    var cursor = this.game.hud.cursor;
+
+    switch (cursor.state) {
+      case Cursor_1.CursorState.TARGET:
+        if (this.game.currentLevel) this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+        break;
+
+      case Cursor_1.CursorState.ARROW:
+        console.log('asd');
+        break;
+    }
   };
 
   MouseEvents.getMouseCoordinates = function () {
@@ -1497,7 +1644,7 @@ function () {
 }();
 
 exports.default = MouseEvents;
-},{}],"src/core/EventsManager.ts":[function(require,module,exports) {
+},{"../hud/Cursor":"src/hud/Cursor.ts"}],"src/core/EventsManager.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1643,6 +1790,10 @@ var colors_1 = require("../utils/colors");
 
 var MouseEvents_1 = __importDefault(require("../event/MouseEvents"));
 
+var HUDManager_1 = __importDefault(require("../hud/HUDManager"));
+
+var Cursor_1 = require("../hud/Cursor");
+
 var Renderer =
 /** @class */
 function () {
@@ -1695,6 +1846,7 @@ function () {
     this.drawObjects(level);
     this.drawCharacters(level);
     this.drawPlayer(level);
+    this.drawHUD(game);
     this.drawCursor(level);
   };
 
@@ -1748,14 +1900,18 @@ function () {
   };
 
   Renderer.prototype.drawCursor = function (level) {
-    var tile = Tilemap_1.default['cursor'];
+    var cursor = HUDManager_1.default.getHUDInstance().cursor;
+    var tile = Tilemap_1.default[cursor.getCursorSprite()];
 
     var _a = MouseEvents_1.default.getMouseCoordinates(),
         x = _a[0],
         y = _a[1];
 
-    x = Math.floor(x / level.map.levelTileWidth) * level.map.levelTileWidth;
-    y = Math.floor(y / level.map.levelTileHeight) * level.map.levelTileHeight;
+    if (cursor.state === Cursor_1.CursorState.TARGET) {
+      x = Math.floor(x / level.map.levelTileWidth) * level.map.levelTileWidth;
+      y = Math.floor(y / level.map.levelTileHeight) * level.map.levelTileHeight;
+    }
+
     this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h, x, y, level.map.levelTileWidth, level.map.levelTileHeight);
   };
 
@@ -1764,7 +1920,7 @@ function () {
 }();
 
 exports.default = Renderer;
-},{"./AssetsManager":"src/core/AssetsManager.ts","../level/Tilemap":"src/level/Tilemap.ts","../utils/constants":"src/utils/constants.ts","../utils/colors":"src/utils/colors.ts","../event/MouseEvents":"src/event/MouseEvents.ts"}],"src/core/Game.ts":[function(require,module,exports) {
+},{"./AssetsManager":"src/core/AssetsManager.ts","../level/Tilemap":"src/level/Tilemap.ts","../utils/constants":"src/utils/constants.ts","../utils/colors":"src/utils/colors.ts","../event/MouseEvents":"src/event/MouseEvents.ts","../hud/HUDManager":"src/hud/HUDManager.ts","../hud/Cursor":"src/hud/Cursor.ts"}],"src/core/Game.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1877,9 +2033,8 @@ function () {
       this._renderer.draw(this, this.currentLevel);
     }
     /* if (this.gameAnimationState.isDialog) { */
+    // this._renderer.drawHUD(this);
 
-
-    this._renderer.drawHUD(this);
     /* } */
 
 
@@ -1894,6 +2049,10 @@ function () {
       this.draw();
       requestAnimationFrame(this.run.bind(this));
     }
+  };
+
+  Game.prototype.getRenderer = function () {
+    return this._renderer;
   };
 
   return Game;
@@ -1944,7 +2103,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52021" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60469" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

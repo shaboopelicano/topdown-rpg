@@ -17,6 +17,7 @@ export default abstract class Character {
     public currentMovingTargetY: number = 0;
     public currentMovingTargetX: number = 0;
     public state :CharacterState = CharacterState.IDLE;
+    public picture : string;
     protected readonly _MOVE_TOWARDS_SPEED: number = 5;
     protected currentPath: any[];
     protected currentMap: Map;
@@ -33,6 +34,10 @@ export default abstract class Character {
         this.isMoving = isMoving;
         this.currentPath = [];
         this.currentMap = map;
+
+        const fotos = ['bruxo','andre','galvao','frota','supla','theo'];
+        const index = Math.floor(Math.random()*(fotos.length));
+        this.picture = fotos[index];
 
         /*         this.w = w;
                 this.h = h; */
