@@ -1170,8 +1170,6 @@ var Player_1 = __importDefault(require("../character/Player"));
 
 var Wizard_1 = __importDefault(require("../character/Wizard"));
 
-var constants_1 = require("../utils/constants");
-
 var directions_1 = require("../utils/directions");
 
 var Battle_1 = __importDefault(require("./Battle"));
@@ -1220,8 +1218,8 @@ function () {
           this.levelState = LevelState.NPC_TURN;
         }
       } else {
-        var matrixValueX = Math.floor(Math.random() * (constants_1.WINDOW_WIDTH - 2 * this.map.levelTileWidth) / this.map.levelTileWidth);
-        var matrixValueY = Math.floor(Math.random() * (constants_1.WINDOW_HEIGHT - 2 * this.map.levelTileHeight) / this.map.levelTileHeight);
+        var matrixValueX = Math.floor(Math.random() * this.player.x / this.map.levelTileWidth);
+        var matrixValueY = Math.floor(Math.random() * this.player.y / this.map.levelTileHeight);
         currentCharacter.startMovingTo(matrixValueX * this.map.levelTileWidth, matrixValueY * this.map.levelTileHeight, this.map);
       }
     } else {
@@ -1285,7 +1283,7 @@ function () {
 }();
 
 exports.default = Level;
-},{"../character/Character":"src/character/Character.ts","../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/constants":"src/utils/constants.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
+},{"../character/Character":"src/character/Character.ts","../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1946,7 +1944,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54913" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52021" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

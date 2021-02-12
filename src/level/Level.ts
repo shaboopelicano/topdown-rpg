@@ -67,8 +67,8 @@ export default class Level {
             }
             else {
 
-                const matrixValueX = Math.floor((Math.random()* (WINDOW_WIDTH - 2*this.map.levelTileWidth) / this.map.levelTileWidth);
-                const matrixValueY = Math.floor((Math.random()* (WINDOW_HEIGHT - 2*this.map.levelTileHeight) / this.map.levelTileHeight);
+                const matrixValueX = Math.floor((Math.random()* (this.player.x) / this.map.levelTileWidth));
+                const matrixValueY = Math.floor((Math.random()* (this.player.y) / this.map.levelTileHeight));
 
                 currentCharacter.startMovingTo(
                     matrixValueX * this.map.levelTileWidth,

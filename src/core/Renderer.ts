@@ -108,7 +108,6 @@ export default class Renderer {
     drawCharacters(level: Level) {
 
         level.characters.forEach((char: Character) => {
-
             const tile: Tile = Tilemap[char.tilemapEntry];
             this.ctx.fillRect(char.x, char.y,
                 level.map.levelTileWidth, level.map.levelTileHeight);
