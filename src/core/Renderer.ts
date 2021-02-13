@@ -139,7 +139,7 @@ export default class Renderer {
 
         let [x, y] = MouseEvents.getMouseCoordinates();
         
-        if (cursor.state === CursorState.TARGET) {
+        if (cursor.state === CursorState.TARGET || cursor.state === CursorState.ATTACK) {
             x = Math.floor(x / level.map.levelTileWidth) * level.map.levelTileWidth;
             y = Math.floor(y / level.map.levelTileHeight) * level.map.levelTileHeight;
         }

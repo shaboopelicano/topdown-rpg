@@ -15,6 +15,7 @@ const Tilemap : any = {
     blackCursor : new Tile(612, 170, 16, 16),
     bruxo: new Tile(0,373,256,256),
     sword :new Tile(544,136,16,16),
+    sword2 :new Tile(544,119,16,16),
     shield :new Tile(629,51,16,16),
     potion :new Tile(544,221,16,16),
     hourglass :new Tile(714,204,16,16),

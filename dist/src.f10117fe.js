@@ -140,6 +140,7 @@ var CursorState;
 (function (CursorState) {
   CursorState[CursorState["ARROW"] = 0] = "ARROW";
   CursorState[CursorState["TARGET"] = 1] = "TARGET";
+  CursorState[CursorState["ATTACK"] = 2] = "ATTACK";
 })(CursorState = exports.CursorState || (exports.CursorState = {}));
 
 var Cursor =
@@ -157,12 +158,24 @@ function () {
 
       case CursorState.TARGET:
         return 'cursor';
+
+      case CursorState.ATTACK:
+        return 'sword2';
     }
   };
 
   Cursor.prototype.updateCoordinates = function (mouseX, mouseY) {
     var infoBox = this._hud.infoBox;
-    if (mouseX > infoBox.x) this.state = CursorState.ARROW;else this.state = CursorState.TARGET;
+
+    if (mouseX > infoBox.x) {
+      if (this.state === CursorState.TARGET) this.state = CursorState.ARROW;
+    } else {
+      if (this.state === CursorState.ARROW) this.state = CursorState.TARGET;
+    }
+  };
+
+  Cursor.prototype.setState = function (state) {
+    this.state = state;
   };
 
   return Cursor;
@@ -450,6 +463,7 @@ var Tilemap = {
   blackCursor: new Tile_1.default(612, 170, 16, 16),
   bruxo: new Tile_1.default(0, 373, 256, 256),
   sword: new Tile_1.default(544, 136, 16, 16),
+  sword2: new Tile_1.default(544, 119, 16, 16),
   shield: new Tile_1.default(629, 51, 16, 16),
   potion: new Tile_1.default(544, 221, 16, 16),
   hourglass: new Tile_1.default(714, 204, 16, 16),
@@ -508,6 +522,8 @@ var constants_1 = require("../utils/constants");
 
 var Box_1 = __importDefault(require("./Box"));
 
+var Cursor_1 = require("./Cursor");
+
 var InfoBox =
 /** @class */
 function (_super) {
@@ -520,6 +536,10 @@ function (_super) {
     _this._INFO_BOX_WIDTH = 300;
     _this._INFO_BOX_BACKGROUND_COLOR = colors_1.Colors.WHITE;
     _this._INFO_BOX_TEXT_COLOR = colors_1.Colors.BLACK;
+    _this._INFO_BOX_ICONS_Y = 300;
+    _this._INFO_BOX_ICONS_OFFSET = 30;
+    _this._INFO_BOX_ICON_WIDTH = 32;
+    _this._INFO_BOX_ICON_HEIGHT = 32;
     _this.iconMapping = null;
     _this.x = constants_1.WINDOW_WIDTH - _this._INFO_BOX_WIDTH;
     _this.y = 0;
@@ -538,26 +558,38 @@ function (_super) {
       },
       item: {
         icon: 'potion',
-        callback: _this.defend.bind(_this)
+        callback: _this.item.bind(_this)
       },
       wait: {
         icon: 'hourglass',
-        callback: _this.defend.bind(_this)
+        callback: _this.wait.bind(_this)
       },
       run: {
         icon: 'torch',
-        callback: _this.defend.bind(_this)
+        callback: _this.torch.bind(_this)
       }
     };
     return _this;
   }
 
   InfoBox.prototype.attack = function () {
-    console.log('attack');
+    this.game.hud.cursor.setState(Cursor_1.CursorState.ATTACK);
   };
 
   InfoBox.prototype.defend = function () {
     console.log('defend');
+  };
+
+  InfoBox.prototype.item = function () {
+    console.log('item');
+  };
+
+  InfoBox.prototype.wait = function () {
+    console.log('wait');
+  };
+
+  InfoBox.prototype.torch = function () {
+    console.log('torch');
   };
 
   InfoBox.prototype.draw = function (ctx) {
@@ -596,7 +628,7 @@ function (_super) {
 
   InfoBox.prototype.drawIcons = function (ctx) {
     var tileSet = this.game.getRenderer().tileset;
-    var offsetX = 30;
+    var offsetX = this._INFO_BOX_ICONS_OFFSET;
     var iconWidth = 32;
     var iconHeight = 32;
     var iconMargin = 20;
@@ -608,7 +640,7 @@ function (_super) {
       var imageWidth = iconWidth;
       var imageHeight = iconHeight;
       var imagePosX = this.x + offsetX + iconNumber * (iconWidth + iconMargin);
-      var imagePosY = 300;
+      var imagePosY = this._INFO_BOX_ICONS_Y;
       ctx.drawImage(tileSet, tile.x, tile.y, tile.w, tile.h, imagePosX, imagePosY, imageWidth, imageHeight);
       iconNumber++;
     }
@@ -630,11 +662,20 @@ function (_super) {
     ctx.drawImage(tileSet, tile.x, tile.y, tile.w, tile.h, imagePosX, imagePosY, imageWidth, imageHeight);
   };
 
+  InfoBox.prototype.clickHandler = function (x, y) {
+    if (x > this.x && y > this._INFO_BOX_ICONS_Y && y < this._INFO_BOX_ICONS_Y + this._INFO_BOX_ICON_HEIGHT) {
+      var click = x - this.x - this._INFO_BOX_ICONS_OFFSET;
+      var index = Math.floor(click / (32 + 20));
+      var item = Object.keys(this.iconMapping)[index > 0 ? index : 0];
+      this.iconMapping[item].callback();
+    }
+  };
+
   return InfoBox;
 }(Box_1.default);
 
 exports.default = InfoBox;
-},{"../level/Tilemap":"src/level/Tilemap.ts","../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
+},{"../level/Tilemap":"src/level/Tilemap.ts","../utils/colors":"src/utils/colors.ts","../utils/constants":"src/utils/constants.ts","./Box":"src/hud/Box.ts","./Cursor":"src/hud/Cursor.ts"}],"src/hud/Lifebar.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1629,7 +1670,7 @@ function () {
         break;
 
       case Cursor_1.CursorState.ARROW:
-        console.log('asd');
+        this.game.hud.infoBox.clickHandler(MouseEvents.mouseX, MouseEvents.mouseY);
         break;
     }
   };
@@ -1907,7 +1948,7 @@ function () {
         x = _a[0],
         y = _a[1];
 
-    if (cursor.state === Cursor_1.CursorState.TARGET) {
+    if (cursor.state === Cursor_1.CursorState.TARGET || cursor.state === Cursor_1.CursorState.ATTACK) {
       x = Math.floor(x / level.map.levelTileWidth) * level.map.levelTileWidth;
       y = Math.floor(y / level.map.levelTileHeight) * level.map.levelTileHeight;
     }
@@ -2103,7 +2144,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60469" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51888" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

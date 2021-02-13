@@ -34,9 +34,9 @@ export default class MouseEvents {
                     this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
                 break;
             case CursorState.ARROW:
-                console.log('asd');
+                this.game.hud.infoBox.clickHandler(MouseEvents.mouseX, MouseEvents.mouseY);
                 break;
-                
+
         }
     }
 

@@ -4,6 +4,7 @@ import Tilemap from "../level/Tilemap";
 import { Colors } from "../utils/colors";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
 import Box from "./Box";
+import { CursorState } from "./Cursor";
 
 export default class InfoBox extends Box {
 
@@ -12,6 +13,10 @@ export default class InfoBox extends Box {
     public readonly _INFO_BOX_WIDTH: number = 300;
     private readonly _INFO_BOX_BACKGROUND_COLOR: string = Colors.WHITE;
     private readonly _INFO_BOX_TEXT_COLOR: string = Colors.BLACK;
+    private readonly _INFO_BOX_ICONS_Y = 300;
+    private _INFO_BOX_ICONS_OFFSET: number = 30;
+    private readonly _INFO_BOX_ICON_WIDTH = 32;
+    private readonly _INFO_BOX_ICON_HEIGHT = 32;
     private iconMapping : any = null;
 
     constructor(game: Game) {
@@ -33,25 +38,37 @@ export default class InfoBox extends Box {
             },
             item: {
                 icon: 'potion',
-                callback: this.defend.bind(this)
+                callback: this.item.bind(this)
             },
             wait: {
                 icon: 'hourglass',
-                callback: this.defend.bind(this)
+                callback: this.wait.bind(this)
             },
             run: {
                 icon: 'torch',
-                callback: this.defend.bind(this)
+                callback: this.torch.bind(this)
             },
         };
     }
 
     attack() {
-        console.log('attack');
+        this.game.hud.cursor.setState(CursorState.ATTACK);
     }
 
     defend() {
         console.log('defend');
+    }
+
+    item() {
+        console.log('item');
+    }
+
+    wait() {
+        console.log('wait');
+    }
+
+    torch() {
+        console.log('torch');
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -91,7 +108,7 @@ export default class InfoBox extends Box {
 
     drawIcons(ctx: CanvasRenderingContext2D) {
         const tileSet: HTMLImageElement = this.game.getRenderer().tileset;
-        const offsetX = 30;
+        const offsetX = this._INFO_BOX_ICONS_OFFSET;
         const iconWidth = 32;
         const iconHeight = 32;
         const iconMargin = 20;
@@ -102,7 +119,7 @@ export default class InfoBox extends Box {
             const imageWidth = iconWidth;
             const imageHeight = iconHeight;
             const imagePosX = this.x + offsetX +  (iconNumber*(iconWidth + iconMargin));
-            const imagePosY = 300;
+            const imagePosY = this._INFO_BOX_ICONS_Y;
             ctx.drawImage(tileSet, tile.x, tile.y, tile.w, tile.h,
                 imagePosX, imagePosY,
                 imageWidth, imageHeight
@@ -129,6 +146,17 @@ export default class InfoBox extends Box {
             imageWidth, imageHeight
         );
     }
+
+    clickHandler(x:number,y:number){
+        if(x > this.x && y > this._INFO_BOX_ICONS_Y && y < this._INFO_BOX_ICONS_Y + this._INFO_BOX_ICON_HEIGHT){
+            const click =  x - this.x  - this._INFO_BOX_ICONS_OFFSET;
+            const index = Math.floor(click/(32 + 20));
+            const item : any = Object.keys(this.iconMapping)[index > 0 ? index : 0];             
+            this.iconMapping[item].callback();
+        }
+    }
+
+
 
 }
 
