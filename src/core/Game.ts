@@ -14,6 +14,20 @@ import Renderer from './Renderer';
 
 export enum GameStates { INTRO, PAUSED, RUNNING, ANIMATING };
 
+export class GameManager {
+
+    private static game: Game;
+
+    public static init(game: Game): void {
+        this.game = game;
+    }
+
+    public static getGameInstance(): Game {
+        return this.game;
+    }
+
+}
+
 export default class Game {
 
     private _assetsLoader: AssetsLoader;
@@ -27,6 +41,9 @@ export default class Game {
     public gameAnimationState: GameAnimationState;
     public currentLevel: Level | null = new Level();
     public currentAnimation: Animation | null = null;
+
+    /* Mudar de lugar */
+    public combatAnimations:any[] = [];
 
     constructor() {
         this._assetsLoader = new AssetsLoader();
@@ -45,6 +62,7 @@ export default class Game {
             AssetsManager.tileset = tileset;
             this._renderer.setTileset(tileset);
             this.isRunning = true;
+            GameManager.init(this);
             requestAnimationFrame(this.run.bind(this));
         }
 
@@ -59,7 +77,7 @@ export default class Game {
             }
             else {
                 if (this.currentLevel?.player.checkCollision(this.currentLevel)) {
-                    if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE){
+                    if (this.currentLevel?.player.checkBoundaries(this.currentLevel) === Directions.NONE) {
                         this.currentLevel?.player.move();
                     }
                     else {
@@ -85,11 +103,15 @@ export default class Game {
         }
 
         /* if (this.gameAnimationState.isDialog) { */
-            // this._renderer.drawHUD(this);
+        // this._renderer.drawHUD(this);
         /* } */
 
         if (this.gameAnimationState.isTransition) {
             this._renderer.drawAnimation(this);
+        }
+
+        if (this.gameAnimationState.isCombatAnimation) {
+            this._renderer.drawCombatAnimation(this);
         }
 
     }
@@ -102,7 +124,7 @@ export default class Game {
         }
     }
 
-    getRenderer(){
+    getRenderer() {
         return this._renderer;
     }
 }

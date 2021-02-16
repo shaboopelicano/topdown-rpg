@@ -14,7 +14,8 @@ export default class MouseEvents {
 
     init(): void {
         window.onmousemove = this.updateMouseCoords.bind(this);
-        window.onclick = this.mouseClicked.bind(this)
+        window.onclick = this.mouseClicked.bind(this);
+        window.oncontextmenu = this.rightMouseButtonClicked.bind(this)
     }
 
     private updateMouseCoords(e: MouseEvent): void {
@@ -29,15 +30,21 @@ export default class MouseEvents {
         const cursor = this.game.hud.cursor;
 
         switch (cursor.state) {
-            case CursorState.TARGET:
-                if (this.game.currentLevel)
-                    this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
-                break;
             case CursorState.ARROW:
                 this.game.hud.infoBox.clickHandler(MouseEvents.mouseX, MouseEvents.mouseY);
                 break;
+            default:
+                if (this.game.currentLevel)
+                    this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+                break;
 
         }
+    }
+
+    private rightMouseButtonClicked(e: Event) {
+        e.preventDefault();
+        this.game.hud.cursor.setState(CursorState.ARROW);
+
     }
 
     public static getMouseCoordinates() {

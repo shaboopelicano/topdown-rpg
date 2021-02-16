@@ -1,6 +1,13 @@
 import Character, { CharacterState } from "../character/Character";
 import Player from "../character/Player";
+import Projectile from "../character/Projectile";
 import Wizard from "../character/Wizard";
+import { GameManager } from "../core/Game";
+import Box from "../hud/Box";
+import { CursorState } from "../hud/Cursor";
+import HUDManager from "../hud/HUDManager";
+import CollisionBox from "../utils/CollisionBox";
+import CollisionDetector from "../utils/CollisionDetector";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../utils/constants";
 import { Directions } from "../utils/directions";
 import Battle from "./Battle";
@@ -24,16 +31,16 @@ export default class Level {
         this.player = player ? player : new Player(this.map);
         this.levelState = LevelState.NPC_TURN;
 
-        
+
         const w1 = new Wizard(this.map, this.map.levelTileWidth * 2, this.map.levelTileHeight * 4, "Hello my name is Wizard fer ");
         const w2 = new Wizard(this.map, this.map.levelTileWidth * 7, this.map.levelTileHeight * 9, "Ha toma no cu viado du carai!");
-        
+
         this.characters = [
             w1,
             w2,
             this.player
         ];
-        
+
         this.turnQueue = this.calculateFirstTurn();
         this.currentCharacterTurn = this.turnQueue.shift();
 
@@ -46,11 +53,11 @@ export default class Level {
 
         const currentCharacter = this.characters[this.currentCharacterTurn];
 
-        this.characters.forEach((c)=>c.isActive = false);
+        this.characters.forEach((c) => c.isActive = false);
         currentCharacter.isActive = true;
 
         if (this.levelState === LevelState.NPC_TURN) {
-            
+
             if (currentCharacter.state === CharacterState.MOVING) {
                 currentCharacter.move();
             }
@@ -67,8 +74,8 @@ export default class Level {
             }
             else {
 
-                const matrixValueX = Math.floor((Math.random()* (this.player.x) / this.map.levelTileWidth));
-                const matrixValueY = Math.floor((Math.random()* (this.player.y) / this.map.levelTileHeight));
+                const matrixValueX = Math.floor((Math.random() * (this.player.x) / this.map.levelTileWidth));
+                const matrixValueY = Math.floor((Math.random() * (this.player.y) / this.map.levelTileHeight));
 
                 currentCharacter.startMovingTo(
                     matrixValueX * this.map.levelTileWidth,
@@ -89,7 +96,7 @@ export default class Level {
     }
 
     calculateFirstTurn(): number[] {
-        this.characters.forEach((char:Character)=>char.state=CharacterState.IDLE);
+        this.characters.forEach((char: Character) => char.state = CharacterState.IDLE);
         return [0, 1, 2];
     }
 
@@ -114,14 +121,56 @@ export default class Level {
     }
 
     mouseInteraction(x: number, y: number) {
+        const cursor = HUDManager.getHUDInstance().cursor;
 
-        /* Cálculo repetido */
         const matrixValueX = Math.floor(x / this.map.levelTileWidth);
         const matrixValueY = Math.floor(y / this.map.levelTileHeight);
 
+        switch (cursor.state) {
+            case CursorState.TARGET:
+                this.move(matrixValueX, matrixValueY); break;
+            case CursorState.ATTACK:
+                this.attack(matrixValueX, matrixValueY);
+                break;
+        }
+    }
+
+    move(x: number, y: number) {
+        /* Cálculo repetido */
         this.player.startMovingTo(
-            matrixValueX * this.map.levelTileWidth,
-            matrixValueY * this.map.levelTileHeight,
+            x * this.map.levelTileWidth,
+            y * this.map.levelTileHeight,
             this.map);
     }
+
+    attack(x: number, y: number) {
+        
+        x = x * this.map.levelTileWidth + this.map.levelTileWidth/2
+        y = y * this.map.levelTileHeight + this.map.levelTileHeight/2
+
+        const levelWidth = this.map.levelTileWidth;
+        const levelHeight = this.map.levelTileHeight;
+
+        const hitCharacter = this.characters[1];
+
+        const game = GameManager.getGameInstance();
+        game.gameAnimationState.isCombatAnimation = true; 
+        game.combatAnimations.push(new Projectile(this.player.x,hitCharacter.x,this.player.y,hitCharacter.y));
+
+/*         
+        Não está encontrando
+            const hitCharacter = this.characters.filter((c: Character) => {
+            console.log(c.getPosition());
+            return CollisionDetector.checkCollision(
+                new CollisionBox(x * levelWidth, y * levelHeight, levelWidth, levelHeight),
+                new CollisionBox(c.x * levelWidth, c.y * levelHeight, levelWidth, levelHeight)
+            );
+        }); */
+
+
+
+    }
+
+
+
 }

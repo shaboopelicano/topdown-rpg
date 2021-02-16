@@ -163,6 +163,10 @@ export default abstract class Character {
         return this.class;
     }
 
+    public getPosition():[number,number]{
+        return [this.x,this.y];
+    }
+
     abstract interaction(): void;
 
 }

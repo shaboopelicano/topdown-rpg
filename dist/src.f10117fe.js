@@ -990,6 +990,10 @@ function () {
     return this.class;
   };
 
+  Character.prototype.getPosition = function () {
+    return [this.x, this.y];
+  };
+
   return Character;
 }();
 
@@ -1149,7 +1153,42 @@ function (_super) {
 }(Character_1.default);
 
 exports.default = Player;
-},{"../utils/classConstants":"src/utils/classConstants.ts","../utils/constants":"src/utils/constants.ts","../utils/directions":"src/utils/directions.ts","./Character":"src/character/Character.ts"}],"src/character/Wizard.ts":[function(require,module,exports) {
+},{"../utils/classConstants":"src/utils/classConstants.ts","../utils/constants":"src/utils/constants.ts","../utils/directions":"src/utils/directions.ts","./Character":"src/character/Character.ts"}],"src/character/Projectile.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Projectile =
+/** @class */
+function () {
+  function Projectile(startingX, endingX, startingY, endingY) {
+    this._VEL = 10;
+    this.startingX = startingX;
+    this.startingY = startingY;
+    this.endingX = endingX;
+    this.endingY = endingY;
+    this.x = this.startingX;
+    this.y = this.startingY;
+    this.vX = startingX < endingX ? 1 : -1;
+    this.vY = startingY < endingY ? 1 : -1;
+  }
+
+  Projectile.prototype.draw = function (ctx) {
+    this.x = this.x + this.vX * this._VEL;
+    this.y = this.y + this.vY * this._VEL;
+    ctx.save();
+    ctx.fillStyle = "#FF0000";
+    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.restore();
+  };
+
+  return Projectile;
+}();
+
+exports.default = Projectile;
+},{}],"src/character/Wizard.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -1341,7 +1380,15 @@ var Character_1 = require("../character/Character");
 
 var Player_1 = __importDefault(require("../character/Player"));
 
+var Projectile_1 = __importDefault(require("../character/Projectile"));
+
 var Wizard_1 = __importDefault(require("../character/Wizard"));
+
+var Game_1 = require("../core/Game");
+
+var Cursor_1 = require("../hud/Cursor");
+
+var HUDManager_1 = __importDefault(require("../hud/HUDManager"));
 
 var directions_1 = require("../utils/directions");
 
@@ -1446,17 +1493,51 @@ function () {
   };
 
   Level.prototype.mouseInteraction = function (x, y) {
-    /* Cálculo repetido */
+    var cursor = HUDManager_1.default.getHUDInstance().cursor;
     var matrixValueX = Math.floor(x / this.map.levelTileWidth);
     var matrixValueY = Math.floor(y / this.map.levelTileHeight);
-    this.player.startMovingTo(matrixValueX * this.map.levelTileWidth, matrixValueY * this.map.levelTileHeight, this.map);
+
+    switch (cursor.state) {
+      case Cursor_1.CursorState.TARGET:
+        this.move(matrixValueX, matrixValueY);
+        break;
+
+      case Cursor_1.CursorState.ATTACK:
+        this.attack(matrixValueX, matrixValueY);
+        break;
+    }
+  };
+
+  Level.prototype.move = function (x, y) {
+    /* Cálculo repetido */
+    this.player.startMovingTo(x * this.map.levelTileWidth, y * this.map.levelTileHeight, this.map);
+  };
+
+  Level.prototype.attack = function (x, y) {
+    x = x * this.map.levelTileWidth + this.map.levelTileWidth / 2;
+    y = y * this.map.levelTileHeight + this.map.levelTileHeight / 2;
+    var levelWidth = this.map.levelTileWidth;
+    var levelHeight = this.map.levelTileHeight;
+    var hitCharacter = this.characters[1];
+    var game = Game_1.GameManager.getGameInstance();
+    game.gameAnimationState.isCombatAnimation = true;
+    game.combatAnimations.push(new Projectile_1.default(this.player.x, hitCharacter.x, this.player.y, hitCharacter.y));
+    /*
+            Não está encontrando
+                const hitCharacter = this.characters.filter((c: Character) => {
+                console.log(c.getPosition());
+                return CollisionDetector.checkCollision(
+                    new CollisionBox(x * levelWidth, y * levelHeight, levelWidth, levelHeight),
+                    new CollisionBox(c.x * levelWidth, c.y * levelHeight, levelWidth, levelHeight)
+                );
+            }); */
   };
 
   return Level;
 }();
 
 exports.default = Level;
-},{"../character/Character":"src/character/Character.ts","../character/Player":"src/character/Player.ts","../character/Wizard":"src/character/Wizard.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
+},{"../character/Character":"src/character/Character.ts","../character/Player":"src/character/Player.ts","../character/Projectile":"src/character/Projectile.ts","../character/Wizard":"src/character/Wizard.ts","../core/Game":"src/core/Game.ts","../hud/Cursor":"src/hud/Cursor.ts","../hud/HUDManager":"src/hud/HUDManager.ts","../utils/directions":"src/utils/directions.ts","./Battle":"src/level/Battle.ts","./Map":"src/level/Map.ts"}],"src/animation/AnimationState.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1651,6 +1732,7 @@ function () {
   MouseEvents.prototype.init = function () {
     window.onmousemove = this.updateMouseCoords.bind(this);
     window.onclick = this.mouseClicked.bind(this);
+    window.oncontextmenu = this.rightMouseButtonClicked.bind(this);
   };
 
   MouseEvents.prototype.updateMouseCoords = function (e) {
@@ -1665,14 +1747,19 @@ function () {
     var cursor = this.game.hud.cursor;
 
     switch (cursor.state) {
-      case Cursor_1.CursorState.TARGET:
-        if (this.game.currentLevel) this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
-        break;
-
       case Cursor_1.CursorState.ARROW:
         this.game.hud.infoBox.clickHandler(MouseEvents.mouseX, MouseEvents.mouseY);
         break;
+
+      default:
+        if (this.game.currentLevel) this.game.currentLevel.mouseInteraction(MouseEvents.mouseX, MouseEvents.mouseY);
+        break;
     }
+  };
+
+  MouseEvents.prototype.rightMouseButtonClicked = function (e) {
+    e.preventDefault();
+    this.game.hud.cursor.setState(Cursor_1.CursorState.ARROW);
   };
 
   MouseEvents.getMouseCoordinates = function () {
@@ -1802,6 +1889,7 @@ function () {
     this.isTransition = false;
     this.isRunning = true;
     this.isDialog = false;
+    this.isCombatAnimation = false;
   }
 
   return GameAnimationState;
@@ -1956,6 +2044,14 @@ function () {
     this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h, x, y, level.map.levelTileWidth, level.map.levelTileHeight);
   };
 
+  Renderer.prototype.drawCombatAnimation = function (game) {
+    var _this = this;
+
+    game.combatAnimations.forEach(function (cAnim) {
+      cAnim.draw(_this.ctx);
+    });
+  };
+
   Renderer.CLEAR_COLOR = "#000000";
   return Renderer;
 }();
@@ -1973,7 +2069,7 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.GameStates = void 0;
+exports.GameManager = exports.GameStates = void 0;
 
 var HUD_1 = __importDefault(require("../hud/HUD"));
 
@@ -2006,6 +2102,24 @@ var GameStates;
 
 ;
 
+var GameManager =
+/** @class */
+function () {
+  function GameManager() {}
+
+  GameManager.init = function (game) {
+    this.game = game;
+  };
+
+  GameManager.getGameInstance = function () {
+    return this.game;
+  };
+
+  return GameManager;
+}();
+
+exports.GameManager = GameManager;
+
 var Game =
 /** @class */
 function () {
@@ -2016,6 +2130,9 @@ function () {
 
     this.currentLevel = new Level_1.default();
     this.currentAnimation = null;
+    /* Mudar de lugar */
+
+    this.combatAnimations = [];
     this._assetsLoader = new AssetsLoader_1.default();
     this._renderer = new Renderer_1.default();
     this._eventsManager = new EventsManager_1.default(this);
@@ -2037,6 +2154,7 @@ function () {
       _this._renderer.setTileset(tileset);
 
       _this.isRunning = true;
+      GameManager.init(_this);
       requestAnimationFrame(_this.run.bind(_this));
     };
 
@@ -2081,6 +2199,10 @@ function () {
 
     if (this.gameAnimationState.isTransition) {
       this._renderer.drawAnimation(this);
+    }
+
+    if (this.gameAnimationState.isCombatAnimation) {
+      this._renderer.drawCombatAnimation(this);
     }
   };
 
@@ -2144,7 +2266,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51888" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61827" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

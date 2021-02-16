@@ -13,6 +13,7 @@ import HUDManager from "../hud/HUDManager";
 import { CursorState } from "../hud/Cursor";
 export default class Renderer {
 
+
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     tileset: HTMLImageElement;
@@ -147,5 +148,11 @@ export default class Renderer {
         this.ctx.drawImage(this.tileset, tile.x, tile.y, tile.w, tile.h,
             x, y,
             level.map.levelTileWidth, level.map.levelTileHeight);
+    }
+
+    drawCombatAnimation(game: Game) {
+        game.combatAnimations.forEach((cAnim : any)=>{
+            cAnim.draw(this.ctx);
+        });
     }
 }
